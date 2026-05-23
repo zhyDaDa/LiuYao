@@ -1,6 +1,13 @@
-import { Button, Modal } from "antd-mobile";
+import { Modal, Toast } from "antd-mobile";
+import { TapButton } from "../components/TapButton";
 
-export function HomePage({ onCast, archiveCount }: { onCast: () => void; archiveCount: number }) {
+export function HomePage({
+  onCast,
+  archiveCount,
+}: {
+  onCast: () => void;
+  archiveCount: number;
+}) {
   function showDebug() {
     Modal.show({
       title: "调试信息",
@@ -30,21 +37,23 @@ export function HomePage({ onCast, archiveCount }: { onCast: () => void; archive
       <div className="panel version-panel">
         <div>
           <h2>版本信息</h2>
-          <p>当前版本 0.1.0-alpha，已包含基础模型、响应式盘面和规则说明入口。</p>
+          <p>
+            当前版本 0.1.0-alpha，已包含基础模型、响应式盘面和规则说明入口。
+          </p>
         </div>
         <div className="button-row">
-          <Button color="primary" onClick={onCast}>
-            起一卦
-          </Button>
-          <Button fill="outline" onClick={showDebug}>
+          <TapButton onTap={onCast}>起一卦</TapButton>
+          <TapButton fill="outline" onTap={showDebug}>
             调试
-          </Button>
+          </TapButton>
         </div>
       </div>
 
       <div className="panel about-panel">
         <h2>关于与发布信息</h2>
-        <p>这里预留作者介绍、联系方式、版本更新与发布说明。正式发布时可以接入网站链接或二维码。</p>
+        <p>
+          这里预留作者介绍、联系方式、版本更新与发布说明。正式发布时可以接入网站链接或二维码。
+        </p>
       </div>
     </section>
   );

@@ -1,6 +1,6 @@
-import { Button } from "antd-mobile";
 import { ChartView } from "../components/ChartView";
 import { FixedExpandButton } from "../components/FixedExpandButton";
+import { TapButton } from "../components/TapButton";
 import type { ChartSnapshot, YaoSnapshot } from "../models/Gua";
 
 export function DivinePage({
@@ -26,12 +26,12 @@ export function DivinePage({
       </div>
 
       <div className="action-strip">
-        <Button color="primary" onClick={onCast}>
+        <TapButton color="primary" onTap={onCast}>
           重新起卦
-        </Button>
-        <Button fill="outline" onClick={onSave}>
+        </TapButton>
+        <TapButton fill="outline" onTap={onSave}>
           存档
-        </Button>
+        </TapButton>
       </div>
 
       {snapshot ? (
@@ -43,9 +43,9 @@ export function DivinePage({
         <div className="panel empty-cast-panel">
           <h2>还没有当前排盘</h2>
           <p>可以先随机起一卦，之后这里会显示万年历信息、本卦、变卦、六神、六亲、世应和每爻力量来源。</p>
-          <Button color="primary" onClick={onCast}>
+          <TapButton color="primary" onTap={onCast}>
             开始起卦
-          </Button>
+          </TapButton>
         </div>
       )}
     </section>

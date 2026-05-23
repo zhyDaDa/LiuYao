@@ -1,4 +1,5 @@
-import { Button, Empty } from "antd-mobile";
+import { Empty } from "antd-mobile";
+import { TapButton } from "../components/TapButton";
 import type { ChartSnapshot } from "../models/Gua";
 
 export function ArchivePage({
@@ -37,9 +38,9 @@ export function ArchivePage({
                 {item.originalName} → {item.changedName}
               </span>
             </button>
-            <Button size="small" fill="outline" onClick={() => onLoad(item)}>
+            <TapButton size="small" fill="outline" onTap={() => onLoad(item)}>
               读档
-            </Button>
+            </TapButton>
           </div>
         ))}
       </div>

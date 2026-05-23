@@ -2,6 +2,7 @@ import type { CalendarInfo } from "./Calendar";
 import { LiuYaoTime } from "./Calendar";
 import type { RuleTrace, RuleYaoContext } from "./Rules";
 import { evaluateYaoRules } from "./Rules";
+import { createId } from "../utils/createId";
 
 export type ElementName = "木" | "火" | "土" | "金" | "水";
 export type RelativeName = "父母" | "兄弟" | "子孙" | "妻财" | "官鬼";
@@ -199,7 +200,7 @@ export class LiuYaoChart {
     yaos: Yao[],
     question = "未命名占事",
     createdAt = new Date(),
-    id: string = crypto.randomUUID(),
+    id: string = createId("chart"),
   ) {
     this.yaos = yaos;
     this.question = question;

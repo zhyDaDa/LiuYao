@@ -1,5 +1,8 @@
 import type { CalendarInfo } from "./Calendar";
-import type { ElementName } from "./Gua";
+import type { ElementName, Yao, YaoSnapshot } from "./Gua";
+
+const SKCH_Effects = ["无", "生", "克", "冲", "合"];
+type SKCH_Effect = (typeof SKCH_Effects)[number];
 
 export interface RuleTrace {
   title: string;
@@ -68,14 +71,19 @@ export function evaluateYaoRules(context: RuleContext): RuleTrace[] {
   });
 }
 
+// 生克冲合
+
+// 月建
 function monthInfluenceRule(context: RuleContext): RuleTrace {
-  return compareElement("月令", context.month.element, context.yao.element);
+  return compareElement("月建", context.month.element, context.yao.element);
 }
 
+// 日辰
 function dayInfluenceRule(context: RuleContext): RuleTrace {
   return compareElement("日辰", context.day.element, context.yao.element);
 }
 
+// 动爻
 function movingYaoRule(context: RuleContext): RuleResult {
   if (!context.yao.isMoving) return null;
   return {
@@ -85,6 +93,9 @@ function movingYaoRule(context: RuleContext): RuleResult {
   };
 }
 
+// 变出之爻回头生克冲合
+
+// 旬空
 function voidBranchRule(context: RuleContext): RuleResult {
   if (!context.voidBranches.includes(context.yao.branch)) return null;
   return {
@@ -94,30 +105,36 @@ function voidBranchRule(context: RuleContext): RuleResult {
   };
 }
 
+function compareYaoForSKCH(
+  sourceYao: YaoSnapshot,
+  targetYao: YaoSnapshot,
+): SKCH_Effect {
+  if (GENERATES[sourceYao.element] === targetYao.element) {
+    return "生";
+  }
+  if (CONTROLS[sourceYao.element] === targetYao.element) {
+    return "克";
+  }
+  if (GENERATES[targetYao.element] === sourceYao.element) {
+    return "冲";
+  }
+  if (CONTROLS[targetYao.element] === sourceYao.element) {
+    return "合";
+  } else {
+    return "无";
+  }
+}
+
 function compareElement(
   source: string,
   sourceElement: ElementName,
   targetElement: ElementName,
 ): RuleTrace {
-  if (sourceElement === targetElement) {
-    return {
-      title: source,
-      effect: 2,
-      reason: `${source}${sourceElement}与本爻同气，直接帮扶。`,
-    };
-  }
   if (GENERATES[sourceElement] === targetElement) {
     return {
       title: source,
-      effect: 1,
+      effect: 2,
       reason: `${source}${sourceElement}生本爻${targetElement}，有生扶之力。`,
-    };
-  }
-  if (GENERATES[targetElement] === sourceElement) {
-    return {
-      title: source,
-      effect: -1,
-      reason: `本爻${targetElement}生${source}${sourceElement}，自身泄气。`,
     };
   }
   if (CONTROLS[sourceElement] === targetElement) {
@@ -129,7 +146,7 @@ function compareElement(
   }
   return {
     title: source,
-    effect: 1,
-    reason: `本爻${targetElement}克${source}${sourceElement}，有制物之力。`,
+    effect: 0,
+    reason: `本爻${targetElement}与${source}${sourceElement}无关。`,
   };
 }

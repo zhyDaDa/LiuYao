@@ -1,3 +1,4 @@
+import { BranchCycleTable } from "../components/BranchCycleTable";
 import { LookupCard } from "../components/LookupCard";
 
 export function TablesPage() {
@@ -7,6 +8,7 @@ export function TablesPage() {
         <span className="eyebrow">速查表</span>
         <h1>基础规则</h1>
       </div>
+      <BranchCycleTable />
       <div className="lookup-grid">
         <LookupCard title="地支五行" rows={["亥子：水", "寅卯：木", "巳午：火", "申酉：金", "辰戌丑未：土"]} />
         <LookupCard title="六亲" rows={["生我：父母", "同我：兄弟", "我生：子孙", "我克：妻财", "克我：官鬼"]} />

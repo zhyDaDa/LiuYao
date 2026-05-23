@@ -1,5 +1,6 @@
-import { Button, Popup } from "antd-mobile";
+import { Popup } from "antd-mobile";
 import type { YaoSnapshot } from "../models/Gua";
+import { TapButton } from "./TapButton";
 
 export function YaoDrawer({ yao, onClose }: { yao: YaoSnapshot | null; onClose: () => void }) {
   return (
@@ -26,9 +27,9 @@ export function YaoDrawer({ yao, onClose }: { yao: YaoSnapshot | null; onClose: 
               </div>
             ))}
           </div>
-          <Button block color="primary" onClick={onClose}>
+          <TapButton block color="primary" onTap={onClose}>
             关闭
-          </Button>
+          </TapButton>
         </div>
       )}
     </Popup>

@@ -66,8 +66,8 @@ function GuaLineCell({ yao, changed = false }: { yao: YaoSnapshot; changed?: boo
       <span className="gua-text">
         <b>
           {changed ? yao.changedRelative : yao.relative}
-          {changed ? yao.changedElement : yao.element}
           {changed ? yao.changedBranch : yao.branch}
+          {changed ? yao.changedElement : yao.element}
         </b>
       </span>
       <LineMark isYang={changed ? yao.changedIsYang : yao.isYang} />
