@@ -1,8 +1,13 @@
 import type { CalendarInfo } from "./Calendar";
-import type { ElementName, Yao, YaoSnapshot } from "./Gua";
-
-const SKCH_Effects = ["无", "生", "克", "冲", "合"];
-type SKCH_Effect = (typeof SKCH_Effects)[number];
+import type {
+  BranchName,
+  ElementName,
+  SKCHEffect,
+  TrigramName,
+  VoidBranches,
+} from "../types/basicTerms";
+import { FIVE_ELEMENT_CONTROLS, FIVE_ELEMENT_GENERATES } from "../types/basicTerms";
+import type { YaoSnapshot } from "./Gua";
 
 export interface RuleTrace {
   title: string;
@@ -12,48 +17,32 @@ export interface RuleTrace {
 
 export interface RuleYaoContext {
   position: number;
-  branch: string;
+  branch: BranchName;
   element: ElementName;
   isMoving: boolean;
 }
 
 export interface RuleContext {
   calendar: CalendarInfo;
-  palace: string;
+  palace: TrigramName;
   palaceElement: ElementName;
-  changedPalace: string;
+  changedPalace: TrigramName;
   changedPalaceElement: ElementName;
   yaos: RuleYaoContext[];
   yao: RuleYaoContext;
   month: {
-    branch: string;
+    branch: BranchName;
     element: ElementName;
   };
   day: {
-    branch: string;
+    branch: BranchName;
     element: ElementName;
   };
-  voidBranches: [string, string];
+  voidBranches: VoidBranches;
 }
 
 export type RuleResult = RuleTrace | RuleTrace[] | null;
 export type Rule = (context: RuleContext) => RuleResult;
-
-const GENERATES: Record<ElementName, ElementName> = {
-  木: "火",
-  火: "土",
-  土: "金",
-  金: "水",
-  水: "木",
-};
-
-const CONTROLS: Record<ElementName, ElementName> = {
-  木: "土",
-  土: "水",
-  水: "火",
-  火: "金",
-  金: "木",
-};
 
 // notice: 规则登记顺序
 export const yaoStrengthRules: Rule[] = [
@@ -105,20 +94,20 @@ function voidBranchRule(context: RuleContext): RuleResult {
   };
 }
 
-function compareYaoForSKCH(
+export function compareYaoForSKCH(
   sourceYao: YaoSnapshot,
   targetYao: YaoSnapshot,
 ): SKCH_Effect {
-  if (GENERATES[sourceYao.element] === targetYao.element) {
+  if (FIVE_ELEMENT_GENERATES[sourceYao.element] === targetYao.element) {
     return "生";
   }
-  if (CONTROLS[sourceYao.element] === targetYao.element) {
+  if (FIVE_ELEMENT_CONTROLS[sourceYao.element] === targetYao.element) {
     return "克";
   }
-  if (GENERATES[targetYao.element] === sourceYao.element) {
+  if (FIVE_ELEMENT_GENERATES[targetYao.element] === sourceYao.element) {
     return "冲";
   }
-  if (CONTROLS[targetYao.element] === sourceYao.element) {
+  if (FIVE_ELEMENT_CONTROLS[targetYao.element] === sourceYao.element) {
     return "合";
   } else {
     return "无";
@@ -130,14 +119,14 @@ function compareElement(
   sourceElement: ElementName,
   targetElement: ElementName,
 ): RuleTrace {
-  if (GENERATES[sourceElement] === targetElement) {
+  if (FIVE_ELEMENT_GENERATES[sourceElement] === targetElement) {
     return {
       title: source,
       effect: 2,
       reason: `${source}${sourceElement}生本爻${targetElement}，有生扶之力。`,
     };
   }
-  if (CONTROLS[sourceElement] === targetElement) {
+  if (FIVE_ELEMENT_CONTROLS[sourceElement] === targetElement) {
     return {
       title: source,
       effect: -2,

@@ -2,28 +2,41 @@ import type { CalendarInfo } from "./Calendar";
 import { LiuYaoTime } from "./Calendar";
 import type { RuleTrace, RuleYaoContext } from "./Rules";
 import { evaluateYaoRules } from "./Rules";
+import type {
+  BranchName,
+  ElementName,
+  GanZhiName,
+  RelativeName,
+  SixSpiritName,
+  StrengthLabel,
+  TrigramName,
+  YaoRole,
+} from "../types/basicTerms";
+import {
+  BRANCH_ELEMENTS,
+  FIVE_ELEMENT_CONTROLS,
+  FIVE_ELEMENT_GENERATES,
+  SIX_SPIRIT_NAMES,
+} from "../types/basicTerms";
 import { createId } from "../utils/createId";
-
-export type ElementName = "木" | "火" | "土" | "金" | "水";
-export type RelativeName = "父母" | "兄弟" | "子孙" | "妻财" | "官鬼";
 
 export interface YaoSnapshot {
   position: number;
   name: string;
   isYang: boolean;
   isMoving: boolean;
-  branch: string;
+  branch: BranchName;
   element: ElementName;
   relative: RelativeName;
-  spirit: string;
-  role: "世" | "应" | "";
-  changedBranch: string;
+  spirit: SixSpiritName;
+  role: YaoRole;
+  changedBranch: BranchName;
   changedElement: ElementName;
   changedRelative: RelativeName;
   changedIsYang: boolean;
-  changedRole: "世" | "应" | "";
+  changedRole: YaoRole;
   strength: number;
-  strengthLabel: "旺" | "平" | "衰";
+  strengthLabel: StrengthLabel;
   traces: RuleTrace[];
 }
 
@@ -34,17 +47,17 @@ export interface ChartSnapshot {
   calendar: CalendarInfo;
   originalName: string;
   changedName: string;
-  palace: string;
-  changedPalace: string;
+  palace: TrigramName;
+  changedPalace: TrigramName;
   palaceElement: ElementName;
   changedPalaceElement: ElementName;
   yaos: YaoSnapshot[];
 }
 
 interface TrigramInfo {
-  readonly name: string;
+  readonly name: TrigramName;
   readonly bits: string;
-  readonly element: string;
+  readonly element: ElementName;
 }
 
 interface TrigramPair {
@@ -53,36 +66,7 @@ interface TrigramPair {
 }
 
 const YAO_NAMES = ["初爻", "二爻", "三爻", "四爻", "五爻", "上爻"];
-const SIX_SPIRITS = ["青龙", "朱雀", "勾陈", "螣蛇", "白虎", "玄武"];
-const GENERATES: Record<ElementName, ElementName> = {
-  木: "火",
-  火: "土",
-  土: "金",
-  金: "水",
-  水: "木",
-};
-const CONTROLS: Record<ElementName, ElementName> = {
-  木: "土",
-  土: "水",
-  水: "火",
-  火: "金",
-  金: "木",
-};
-const BRANCH_ELEMENTS: Record<string, ElementName> = {
-  子: "水",
-  丑: "土",
-  寅: "木",
-  卯: "木",
-  辰: "土",
-  巳: "火",
-  午: "火",
-  未: "土",
-  申: "金",
-  酉: "金",
-  戌: "土",
-  亥: "水",
-};
-const TRIGRAMS = [
+const TRIGRAMS: readonly TrigramInfo[] = [
   { name: "乾", bits: "111", element: "金" },
   { name: "兑", bits: "110", element: "金" },
   { name: "离", bits: "101", element: "火" },
@@ -92,7 +76,7 @@ const TRIGRAMS = [
   { name: "艮", bits: "001", element: "土" },
   { name: "坤", bits: "000", element: "土" },
 ] as const;
-const NA_JIA: Record<string, string[]> = {
+const NA_JIA: Record<TrigramName, BranchName[]> = {
   乾: ["子", "寅", "辰", "午", "申", "戌"],
   震: ["子", "寅", "辰", "午", "申", "戌"],
   坎: ["寅", "辰", "午", "申", "戌", "子"],
@@ -256,6 +240,8 @@ export class LiuYaoChart {
     const changedBranches = this.getBranches(changedTrigrams);
     const calendar = this.getCalendar();
     const spirits = this.getSixSpirits(calendar.day[0]);
+    const monthBranch = getGanZhiBranch(calendar.month);
+    const dayBranch = getGanZhiBranch(calendar.day);
     const ruleYaos: RuleYaoContext[] = this.yaos.map((yao) => {
       const branch = branches[yao.position];
       return {
@@ -292,12 +278,12 @@ export class LiuYaoChart {
           yaos: ruleYaos,
           yao: ruleYaos[yao.position],
           month: {
-            branch: calendar.month[1],
-            element: BRANCH_ELEMENTS[calendar.month[1]],
+            branch: monthBranch,
+            element: BRANCH_ELEMENTS[monthBranch],
           },
           day: {
-            branch: calendar.day[1],
-            element: BRANCH_ELEMENTS[calendar.day[1]],
+            branch: dayBranch,
+            element: BRANCH_ELEMENTS[dayBranch],
           },
           voidBranches: calendar.voidBranches,
         });
@@ -350,7 +336,7 @@ export class LiuYaoChart {
     };
   }
 
-  private getBranches(trigrams: TrigramPair): string[] {
+  private getBranches(trigrams: TrigramPair): BranchName[] {
     return [
       ...NA_JIA[trigrams.lower.name].slice(0, 3),
       ...NA_JIA[trigrams.upper.name].slice(3, 6),
@@ -394,7 +380,7 @@ export class LiuYaoChart {
     };
   }
 
-  private getSixSpirits(dayStem: string): string[] {
+  private getSixSpirits(dayStem: string): SixSpiritName[] {
     const startMap: Record<string, number> = {
       甲: 0,
       乙: 0,
@@ -410,7 +396,7 @@ export class LiuYaoChart {
     const start = startMap[dayStem] ?? 0;
     return Array.from(
       { length: 6 },
-      (_, index) => SIX_SPIRITS[(start + index) % SIX_SPIRITS.length],
+      (_, index) => SIX_SPIRIT_NAMES[(start + index) % SIX_SPIRIT_NAMES.length],
     );
   }
 }
@@ -420,13 +406,13 @@ function getRelative(
   yaoElement: ElementName,
 ): RelativeName {
   if (palaceElement === yaoElement) return "兄弟";
-  if (GENERATES[yaoElement] === palaceElement) return "父母";
-  if (GENERATES[palaceElement] === yaoElement) return "子孙";
-  if (CONTROLS[yaoElement] === palaceElement) return "官鬼";
+  if (FIVE_ELEMENT_GENERATES[yaoElement] === palaceElement) return "父母";
+  if (FIVE_ELEMENT_GENERATES[palaceElement] === yaoElement) return "子孙";
+  if (FIVE_ELEMENT_CONTROLS[yaoElement] === palaceElement) return "官鬼";
   return "妻财";
 }
 
-function trigramByBits(bits: string) {
+function trigramByBits(bits: string): TrigramInfo {
   const trigram = TRIGRAMS.find((item) => item.bits === bits);
   if (!trigram) {
     throw new Error(`未知三爻组合：${bits}`);
@@ -434,17 +420,17 @@ function trigramByBits(bits: string) {
   return trigram;
 }
 
-function trigramElement(name: string): ElementName {
+function trigramElement(name: TrigramName): ElementName {
   const trigram = TRIGRAMS.find((item) => item.name === name);
   if (!trigram) {
     throw new Error(`未知八卦：${name}`);
   }
-  return trigram.element as ElementName;
+  return trigram.element;
 }
 
 function getGuaName(trigrams: {
-  upper: { name: string };
-  lower: { name: string };
+  upper: { name: TrigramName };
+  lower: { name: TrigramName };
 }) {
   return (
     GUA_NAMES[trigrams.upper.name + trigrams.lower.name] ??
@@ -454,4 +440,8 @@ function getGuaName(trigrams: {
 
 function toBit(yao: Yao) {
   return yao.isYang ? "1" : "0";
+}
+
+function getGanZhiBranch(ganZhi: GanZhiName): BranchName {
+  return ganZhi[1] as BranchName;
 }
