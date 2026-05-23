@@ -39,7 +39,9 @@ body {
 }
 
 button,
-input {
+input,
+select,
+textarea {
   font: inherit;
 }
 
@@ -736,6 +738,13 @@ h2 {
   margin-top: 4px;
   color: var(--muted);
   font-size: 13px;
+}
+
+.archive-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
 }
 
 .lookup-card {

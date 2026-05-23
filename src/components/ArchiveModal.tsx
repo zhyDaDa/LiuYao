@@ -29,6 +29,7 @@ export function ArchiveModal({
               {item.originalName}（{item.palace}宫）变 {item.changedName}
             </p>
             <p>旬空：{item.calendar.voidBranches.join("、")}</p>
+            {item.remark ? <p>备注：{item.remark}</p> : null}
           </div>
         ) : null
       }

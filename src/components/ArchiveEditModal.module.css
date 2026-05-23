@@ -1,0 +1,67 @@
+.modalBody {
+  max-height: calc(100svh - 28px);
+  overflow: hidden;
+}
+
+.modalBody :global(.adm-modal-content) {
+  max-height: calc(100svh - 126px);
+  overflow-y: auto;
+  padding: 0 8px 10px;
+}
+
+.form {
+  display: grid;
+  gap: 12px;
+  padding: 2px;
+  text-align: left;
+}
+
+.field,
+.yaoField {
+  display: grid;
+  gap: 6px;
+}
+
+.field span,
+.yaoField span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.field input,
+.field textarea,
+.yaoField select {
+  width: 100%;
+  min-height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  background: var(--surface);
+  font: inherit;
+}
+
+.field input,
+.yaoField select {
+  padding: 7px 10px;
+}
+
+.field textarea {
+  min-height: 82px;
+  padding: 9px 10px;
+  resize: vertical;
+}
+
+.yaoList {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+}
+
+.yaoField {
+  grid-template-columns: 44px minmax(0, 1fr);
+  align-items: center;
+}

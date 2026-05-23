@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { Toast } from "antd-mobile";
+import { Dialog, Toast } from "antd-mobile";
+import { ArchiveEditModal } from "./components/ArchiveEditModal";
 import { ArchiveModal } from "./components/ArchiveModal";
 import { BottomNav } from "./components/BottomNav";
 import { YaoDrawer } from "./components/YaoDrawer";
@@ -18,6 +19,7 @@ function App() {
   const [archive, setArchive] = useState<ChartSnapshot[]>(readArchive);
   const [selectedYao, setSelectedYao] = useState<YaoSnapshot | null>(null);
   const [archivePreview, setArchivePreview] = useState<ChartSnapshot | null>(null);
+  const [archiveEdit, setArchiveEdit] = useState<ChartSnapshot | null>(null);
   const [expanded, setExpanded] = useState(false);
   const snapshot = useMemo(() => chart?.toSnapshot() ?? null, [chart]);
 
@@ -42,8 +44,40 @@ function App() {
   function loadArchive(item: ChartSnapshot) {
     setChart(LiuYaoChart.fromSnapshot(item));
     setArchivePreview(null);
+    setArchiveEdit(null);
     setActiveKey("divine");
     Toast.show({ content: "已读档到排盘页" });
+  }
+
+  function updateArchive(item: ChartSnapshot) {
+    const nextArchive = archive.map((archiveItem) =>
+      archiveItem.id === item.id ? item : archiveItem,
+    );
+    setArchive(nextArchive);
+    writeArchive(nextArchive);
+    setArchiveEdit(null);
+    setArchivePreview((current) => (current?.id === item.id ? item : current));
+    if (chart?.id === item.id) {
+      setChart(LiuYaoChart.fromSnapshot(item));
+    }
+    Toast.show({ content: "已更新历史排盘" });
+  }
+
+  async function deleteArchive(item: ChartSnapshot) {
+    const confirmed = await Dialog.confirm({
+      title: "删除存档",
+      content: `确定删除「${item.question}」吗？`,
+      confirmText: "删除",
+      cancelText: "取消",
+    });
+    if (!confirmed) return;
+
+    const nextArchive = archive.filter((archiveItem) => archiveItem.id !== item.id);
+    setArchive(nextArchive);
+    writeArchive(nextArchive);
+    setArchivePreview((current) => (current?.id === item.id ? null : current));
+    setArchiveEdit((current) => (current?.id === item.id ? null : current));
+    Toast.show({ content: "已删除历史排盘" });
   }
 
   return (
@@ -61,7 +95,13 @@ function App() {
           />
         )}
         {activeKey === "archive" && (
-          <ArchivePage archive={archive} onPreview={setArchivePreview} onLoad={loadArchive} />
+          <ArchivePage
+            archive={archive}
+            onPreview={setArchivePreview}
+            onLoad={loadArchive}
+            onEdit={setArchiveEdit}
+            onDelete={deleteArchive}
+          />
         )}
         {activeKey === "tables" && <TablesPage />}
       </main>
@@ -69,6 +109,11 @@ function App() {
       {!expanded && <BottomNav activeKey={activeKey} onChange={setActiveKey} />}
       <YaoDrawer yao={selectedYao} onClose={() => setSelectedYao(null)} />
       <ArchiveModal item={archivePreview} onClose={() => setArchivePreview(null)} onLoad={loadArchive} />
+      <ArchiveEditModal
+        item={archiveEdit}
+        onClose={() => setArchiveEdit(null)}
+        onSave={updateArchive}
+      />
     </div>
   );
 }

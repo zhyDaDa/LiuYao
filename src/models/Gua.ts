@@ -44,6 +44,7 @@ export interface ChartSnapshot {
   id: string;
   title: string;
   question: string;
+  remark?: string;
   calendar: CalendarInfo;
   originalName: string;
   changedName: string;
@@ -177,6 +178,7 @@ export class LiuYaoChart {
   public readonly id: string;
   public readonly title: string;
   public readonly question: string;
+  public readonly remark: string;
   public readonly createdAt: Date;
   public readonly yaos: Yao[];
 
@@ -185,9 +187,11 @@ export class LiuYaoChart {
     question = "未命名占事",
     createdAt = new Date(),
     id: string = createId("chart"),
+    remark = "",
   ) {
     this.yaos = yaos;
     this.question = question;
+    this.remark = remark;
     this.createdAt = createdAt;
     this.id = id;
     this.title = `${question} · ${createdAt.toLocaleDateString("zh-CN")}`;
@@ -227,6 +231,7 @@ export class LiuYaoChart {
       snapshot.question,
       new Date(snapshot.calendar.createdAt),
       snapshot.id,
+      snapshot.remark ?? "",
     );
   }
 
@@ -259,6 +264,7 @@ export class LiuYaoChart {
       id: this.id,
       title: this.title,
       question: this.question,
+      remark: this.remark,
       calendar,
       originalName: getGuaName(originalTrigrams),
       changedName: getGuaName(changedTrigrams),

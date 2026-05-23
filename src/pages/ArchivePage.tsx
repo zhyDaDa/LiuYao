@@ -6,10 +6,14 @@ export function ArchivePage({
   archive,
   onPreview,
   onLoad,
+  onEdit,
+  onDelete,
 }: {
   archive: ChartSnapshot[];
   onPreview: (item: ChartSnapshot) => void;
   onLoad: (item: ChartSnapshot) => void;
+  onEdit: (item: ChartSnapshot) => void;
+  onDelete: (item: ChartSnapshot) => void;
 }) {
   if (archive.length === 0) {
     return (
@@ -38,9 +42,17 @@ export function ArchivePage({
                 {item.originalName} → {item.changedName}
               </span>
             </button>
-            <TapButton size="small" fill="outline" onTap={() => onLoad(item)}>
-              读档
-            </TapButton>
+            <div className="archive-actions">
+              <TapButton size="small" fill="outline" onTap={() => onLoad(item)}>
+                读档
+              </TapButton>
+              <TapButton size="small" fill="outline" onTap={() => onEdit(item)}>
+                编辑
+              </TapButton>
+              <TapButton size="small" fill="none" onTap={() => onDelete(item)}>
+                删除
+              </TapButton>
+            </div>
           </div>
         ))}
       </div>
