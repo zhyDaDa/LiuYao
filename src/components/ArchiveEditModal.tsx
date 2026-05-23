@@ -9,8 +9,7 @@ import {
 } from "../models/Archive";
 import type { ChartSnapshot } from "../models/Gua";
 import styles from "./ArchiveEditModal.module.css";
-
-const YAO_LABELS = ["初爻", "二爻", "三爻", "四爻", "五爻", "上爻"];
+import { YAO_NAMES } from "../types/basicTerms";
 
 export function ArchiveEditModal({
   item,
@@ -71,7 +70,9 @@ export function ArchiveEditModal({
                 value={draft.question}
                 maxLength={40}
                 placeholder="例如：工作选择"
-                onChange={(event) => updateDraft("question", event.target.value)}
+                onChange={(event) =>
+                  updateDraft("question", event.target.value)
+                }
               />
             </label>
 
@@ -80,14 +81,16 @@ export function ArchiveEditModal({
               <input
                 type="datetime-local"
                 value={draft.createdAt}
-                onChange={(event) => updateDraft("createdAt", event.target.value)}
+                onChange={(event) =>
+                  updateDraft("createdAt", event.target.value)
+                }
               />
             </label>
 
             <div className={styles.yaoList}>
               {draft.yaos.map((value, position) => (
-                <label className={styles.yaoField} key={YAO_LABELS[position]}>
-                  <span>{YAO_LABELS[position]}</span>
+                <label className={styles.yaoField} key={YAO_NAMES[position]}>
+                  <span>{YAO_NAMES[position]}</span>
                   <select
                     value={value}
                     onChange={(event) =>

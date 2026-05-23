@@ -16,6 +16,7 @@ import {
   FIVE_ELEMENT_CONTROLS,
   FIVE_ELEMENT_GENERATES,
   SIX_SPIRIT_NAMES,
+  YAO_NAMES,
 } from "../types/basicTerms";
 import { branch2Element } from "../utils/branch2Element";
 import { createId } from "../utils/createId";
@@ -66,7 +67,6 @@ interface TrigramPair {
   upper: TrigramInfo;
 }
 
-const YAO_NAMES = ["初爻", "二爻", "三爻", "四爻", "五爻", "上爻"];
 const TRIGRAMS: readonly TrigramInfo[] = [
   { name: "乾", bits: "111", element: "金" },
   { name: "兑", bits: "110", element: "金" },

@@ -1,4 +1,4 @@
-import { Modal, Toast } from "antd-mobile";
+import { Modal } from "antd-mobile";
 import { TapButton } from "../components/TapButton";
 
 export function HomePage({
