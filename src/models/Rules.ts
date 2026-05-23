@@ -6,8 +6,8 @@ import type {
   TrigramName,
   VoidBranches,
 } from "../types/basicTerms";
-import { FIVE_ELEMENT_CONTROLS, FIVE_ELEMENT_GENERATES } from "../types/basicTerms";
-import type { YaoSnapshot } from "./Gua";
+import { compareYaoForSKCH } from "../utils/SKCH";
+import { BE_pair } from "../utils/branch2Element";
 
 export interface RuleTrace {
   title: string;
@@ -19,6 +19,8 @@ export interface RuleYaoContext {
   position: number;
   branch: BranchName;
   element: ElementName;
+  changedBranch: BranchName;
+  changedElement: ElementName;
   isMoving: boolean;
 }
 
@@ -49,6 +51,7 @@ export const yaoStrengthRules: Rule[] = [
   monthInfluenceRule,
   dayInfluenceRule,
   movingYaoRule,
+  backInfluenceRule,
   voidBranchRule,
 ];
 
@@ -63,79 +66,89 @@ export function evaluateYaoRules(context: RuleContext): RuleTrace[] {
 // 生克冲合
 
 // 月建
-function monthInfluenceRule(context: RuleContext): RuleTrace {
-  return compareElement("月建", context.month.element, context.yao.element);
+function monthInfluenceRule(context: RuleContext): RuleTrace | null {
+  return createSKCHTrace("月建", context.month.branch, context.yao.branch);
 }
 
 // 日辰
-function dayInfluenceRule(context: RuleContext): RuleTrace {
-  return compareElement("日辰", context.day.element, context.yao.element);
+function dayInfluenceRule(context: RuleContext): RuleTrace | null {
+  return createSKCHTrace("日辰", context.day.branch, context.yao.branch);
 }
 
 // 动爻
-function movingYaoRule(context: RuleContext): RuleResult {
-  if (!context.yao.isMoving) return null;
-  return {
-    title: "动爻",
-    effect: 1,
-    reason: "本爻发动，有主动变化之力。",
-  };
+function movingYaoRule(context: RuleContext): RuleTrace[] {
+  return context.yaos.flatMap((yao) => {
+    if (!yao.isMoving || yao.position === context.yao.position) return [];
+    const trace = createSKCHTrace("动爻", yao.branch, context.yao.branch);
+    return trace ? [trace] : [];
+  });
 }
 
 // 变出之爻回头生克冲合
+function backInfluenceRule(context: RuleContext): RuleTrace | null {
+  if (!context.yao.isMoving) return null;
+  return createSKCHTrace("回头", context.yao.changedBranch, context.yao.branch);
+}
 
 // 旬空
 function voidBranchRule(context: RuleContext): RuleResult {
   if (!context.voidBranches.includes(context.yao.branch)) return null;
+  const yaoBE = new BE_pair(context.yao.branch);
   return {
     title: "旬空",
     effect: -2,
-    reason: `[${context.yao.branch}]落入旬空，当前力量暂不落实。`,
+    reason: `[${yaoBE}]逢旬空`,
   };
 }
 
-export function compareYaoForSKCH(
-  sourceYao: YaoSnapshot,
-  targetYao: YaoSnapshot,
-): SKCH_Effect {
-  if (FIVE_ELEMENT_GENERATES[sourceYao.element] === targetYao.element) {
-    return "生";
-  }
-  if (FIVE_ELEMENT_CONTROLS[sourceYao.element] === targetYao.element) {
-    return "克";
-  }
-  if (FIVE_ELEMENT_GENERATES[targetYao.element] === sourceYao.element) {
-    return "冲";
-  }
-  if (FIVE_ELEMENT_CONTROLS[targetYao.element] === sourceYao.element) {
-    return "合";
-  } else {
-    return "无";
-  }
-}
+function createSKCHTrace(
+  source: "月建" | "日辰" | "动爻" | "回头",
+  sourceBranch: BranchName,
+  targetBranch: BranchName,
+): RuleTrace | null {
+  const sourceBE = new BE_pair(sourceBranch);
+  const targetBE = new BE_pair(targetBranch);
+  const skch = compareYaoForSKCH(sourceBE.branch, targetBE.branch);
 
-function compareElement(
-  source: string,
-  sourceElement: ElementName,
-  targetElement: ElementName,
-): RuleTrace {
-  if (FIVE_ELEMENT_GENERATES[sourceElement] === targetElement) {
-    return {
-      title: source,
-      effect: 2,
-      reason: `${source}${sourceElement}生本爻${targetElement}，有生扶之力。`,
-    };
-  }
-  if (FIVE_ELEMENT_CONTROLS[sourceElement] === targetElement) {
-    return {
-      title: source,
-      effect: -2,
-      reason: `${source}${sourceElement}克本爻${targetElement}，受制较重。`,
-    };
-  }
+  if (skch === "无") return null;
+
   return {
-    title: source,
-    effect: 0,
-    reason: `本爻${targetElement}与${source}${sourceElement}无关。`,
+    title: getSKCHTitle(source, skch),
+    effect: getSKCHEffect(skch),
+    reason: getSKCHReason(source, skch, sourceBE, targetBE),
   };
+}
+
+function getSKCHTitle(
+  source: "月建" | "日辰" | "动爻" | "回头",
+  skch: Exclude<SKCHEffect, "无">,
+): string {
+  if (source === "月建" && skch === "冲") return "月破";
+  if (source === "回头") return `${source}${skch}`;
+  return `${source}${skch}`;
+}
+
+function getSKCHEffect(skch: Exclude<SKCHEffect, "无">): number {
+  if (skch === "生") return 2;
+  if (skch === "合") return 1;
+  if (skch === "克") return -1;
+  return -2;
+}
+
+function getSKCHReason(
+  source: "月建" | "日辰" | "动爻" | "回头",
+  skch: Exclude<SKCHEffect, "无">,
+  sourceBE: BE_pair,
+  targetBE: BE_pair,
+): string {
+  if (source === "月建" && skch === "冲") {
+    return `[${targetBE}]被月建[${sourceBE}]冲破`;
+  }
+  if (source === "回头") {
+    return `[${sourceBE}]回头${skch}[${targetBE}]`;
+  }
+  if (skch === "克") {
+    return `[${targetBE}]被${source}[${sourceBE}]克`;
+  }
+  return `${source}[${sourceBE}]${skch}[${targetBE}]`;
 }

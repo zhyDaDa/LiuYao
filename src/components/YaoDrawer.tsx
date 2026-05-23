@@ -10,15 +10,15 @@ export function YaoDrawer({ yao, onClose }: { yao: YaoSnapshot | null; onClose: 
           <div className="drawer-title">
             <span>{yao.spirit}</span>
             <h2>
-              {yao.name} · {yao.relative}{yao.element}{yao.branch}
+              {yao.name} · {yao.relative}{yao.branch}{yao.element}
             </h2>
             <p>
               当前判断：{yao.strengthLabel}，综合分 {yao.strength}
             </p>
           </div>
           <div className="trace-list">
-            {yao.traces.map((trace) => (
-              <div className="trace-item" key={trace.title + trace.reason}>
+            {yao.traces.map((trace, index) => (
+              <div className="trace-item" key={index}>
                 <strong>
                   {trace.title}
                   <em>{trace.effect > 0 ? `+${trace.effect}` : trace.effect}</em>

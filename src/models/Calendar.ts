@@ -20,6 +20,8 @@ const JIA_ZI: GanZhiName[] = Array.from(
   (_, index) => `${STEM_NAMES[index % 10]}${BRANCH_NAMES[index % 12]}` as GanZhiName,
 );
 
+const COMMON_YEAR_MONTH_DAYS = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31] as const;
+
 export class LiuYaoTime {
   public readonly date: Date;
 
@@ -30,8 +32,7 @@ export class LiuYaoTime {
   toCalendarInfo(): CalendarInfo {
     const year = this.date.getFullYear();
     const month = this.date.getMonth() + 1;
-    const dayIndex = daysBetween(new Date(1900, 0, 1), startOfDay(this.date));
-    const dayGanZhiIndex = mod(35 + dayIndex, 60);
+    const dayGanZhiIndex = getDayGanZhiIndex(this.date);
     const dayStemIndex = dayGanZhiIndex % 10;
     const hourBranchIndex = Math.floor(((this.date.getHours() + 1) % 24) / 2);
     const hourStemStart = [0, 2, 4, 6, 8][dayStemIndex % 5];
@@ -72,12 +73,28 @@ function getVoidBranches(ganZhiIndex: number): VoidBranches {
   return [BRANCH_NAMES[(voidBranchStart + 10) % 12], BRANCH_NAMES[(voidBranchStart + 11) % 12]];
 }
 
-function startOfDay(date: Date) {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+function getDayGanZhiIndex(date: Date) {
+  const yearLastTwoDigits = mod(date.getFullYear(), 100);
+  const janFirstBase =
+    ((yearLastTwoDigits + 7) * 5 + 15 + Math.floor((yearLastTwoDigits + 19) / 4)) % 60;
+  const serial = mod(janFirstBase + getDayOfYear(date), 60);
+
+  return serial === 0 ? 59 : serial - 1;
 }
 
-function daysBetween(start: Date, end: Date) {
-  return Math.floor((end.getTime() - start.getTime()) / 86400000);
+function getDayOfYear(date: Date) {
+  const monthIndex = date.getMonth();
+  const daysBeforeMonth = COMMON_YEAR_MONTH_DAYS.slice(0, monthIndex).reduce(
+    (sum, days) => sum + days,
+    0,
+  );
+  const leapDay = isLeapYear(date.getFullYear()) && monthIndex > 1 ? 1 : 0;
+
+  return daysBeforeMonth + leapDay + date.getDate();
+}
+
+function isLeapYear(year: number) {
+  return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
 }
 
 function getGanZhiStem(ganZhi: GanZhiName): StemName {

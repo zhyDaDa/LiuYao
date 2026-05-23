@@ -1,5 +1,7 @@
 import { useRef, useState } from "react";
 import type { BranchName, ElementName, YinYang } from "../types/basicTerms";
+import { branch2Element } from "../utils/branch2Element";
+import { findBranchClash, findBranchHarmony } from "../utils/SKCH";
 
 interface BranchCell {
   name: BranchName;
@@ -9,45 +11,34 @@ interface BranchCell {
   col: number;
 }
 
-const branches: BranchCell[] = [
-  { name: "巳", element: "火", yinYang: "阴", row: 1, col: 1 },
-  { name: "午", element: "火", yinYang: "阳", row: 1, col: 2 },
-  { name: "未", element: "土", yinYang: "阴", row: 1, col: 3 },
-  { name: "申", element: "金", yinYang: "阳", row: 1, col: 4 },
-  { name: "辰", element: "土", yinYang: "阳", row: 2, col: 1 },
-  { name: "酉", element: "金", yinYang: "阴", row: 2, col: 4 },
-  { name: "卯", element: "木", yinYang: "阴", row: 3, col: 1 },
-  { name: "戌", element: "土", yinYang: "阳", row: 3, col: 4 },
-  { name: "寅", element: "木", yinYang: "阳", row: 4, col: 1 },
-  { name: "丑", element: "土", yinYang: "阴", row: 4, col: 2 },
-  { name: "子", element: "水", yinYang: "阳", row: 4, col: 3 },
-  { name: "亥", element: "水", yinYang: "阴", row: 4, col: 4 },
+type BranchLayout = Omit<BranchCell, "element">;
+
+const branchLayouts: BranchLayout[] = [
+  { name: "巳", yinYang: "阴", row: 1, col: 1 },
+  { name: "午", yinYang: "阳", row: 1, col: 2 },
+  { name: "未", yinYang: "阴", row: 1, col: 3 },
+  { name: "申", yinYang: "阳", row: 1, col: 4 },
+  { name: "辰", yinYang: "阳", row: 2, col: 1 },
+  { name: "酉", yinYang: "阴", row: 2, col: 4 },
+  { name: "卯", yinYang: "阴", row: 3, col: 1 },
+  { name: "戌", yinYang: "阳", row: 3, col: 4 },
+  { name: "寅", yinYang: "阳", row: 4, col: 1 },
+  { name: "丑", yinYang: "阴", row: 4, col: 2 },
+  { name: "子", yinYang: "阳", row: 4, col: 3 },
+  { name: "亥", yinYang: "阴", row: 4, col: 4 },
 ];
 
-const clashPairs: Array<[BranchName, BranchName]> = [
-  ["子", "午"],
-  ["丑", "未"],
-  ["寅", "申"],
-  ["卯", "酉"],
-  ["辰", "戌"],
-  ["巳", "亥"],
-];
-
-const harmonyPairs: Array<[BranchName, BranchName]> = [
-  ["子", "亥"],
-  ["寅", "卯"],
-  ["巳", "午"],
-  ["申", "酉"],
-  ["辰", "丑"],
-  ["戌", "未"],
-];
+const branches: BranchCell[] = branchLayouts.map((branch) => ({
+  ...branch,
+  element: branch2Element(branch.name),
+}));
 
 export function BranchCycleTable() {
   const [active, setActive] = useState<BranchName | null>(null);
   const timerRef = useRef<number | null>(null);
   const selected = active ? branches.find((branch) => branch.name === active) : null;
-  const clash = active ? findPartner(active, clashPairs) : null;
-  const harmony = active ? findPartner(active, harmonyPairs) : null;
+  const clash = active ? findBranchClash(active) : null;
+  const harmony = active ? findBranchHarmony(active) : null;
 
   function startPress(branch: BranchName) {
     stopPress();
@@ -117,12 +108,6 @@ function RelationLine({ from, to, kind }: { from: BranchName; to: BranchName; ki
       y2={toPoint.y}
     />
   );
-}
-
-function findPartner(branch: BranchName, pairs: Array<[BranchName, BranchName]>) {
-  const pair = pairs.find(([left, right]) => left === branch || right === branch);
-  if (!pair) return null;
-  return pair[0] === branch ? pair[1] : pair[0];
 }
 
 function getPoint(branchName: BranchName) {

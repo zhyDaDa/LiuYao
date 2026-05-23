@@ -46,18 +46,3 @@ export const FIVE_ELEMENT_CONTROLS: Record<ElementName, ElementName> = {
   火: "金",
   金: "木",
 };
-
-export const BRANCH_ELEMENTS: Record<BranchName, ElementName> = {
-  子: "水",
-  丑: "土",
-  寅: "木",
-  卯: "木",
-  辰: "土",
-  巳: "火",
-  午: "火",
-  未: "土",
-  申: "金",
-  酉: "金",
-  戌: "土",
-  亥: "水",
-};

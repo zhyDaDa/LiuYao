@@ -13,11 +13,11 @@ import type {
   YaoRole,
 } from "../types/basicTerms";
 import {
-  BRANCH_ELEMENTS,
   FIVE_ELEMENT_CONTROLS,
   FIVE_ELEMENT_GENERATES,
   SIX_SPIRIT_NAMES,
 } from "../types/basicTerms";
+import { branch2Element } from "../utils/branch2Element";
 import { createId } from "../utils/createId";
 
 export interface YaoSnapshot {
@@ -244,10 +244,13 @@ export class LiuYaoChart {
     const dayBranch = getGanZhiBranch(calendar.day);
     const ruleYaos: RuleYaoContext[] = this.yaos.map((yao) => {
       const branch = branches[yao.position];
+      const changedBranch = changedBranches[yao.position];
       return {
         position: yao.position,
         branch,
-        element: BRANCH_ELEMENTS[branch],
+        element: branch2Element(branch),
+        changedBranch,
+        changedElement: branch2Element(changedBranch),
         isMoving: yao.isMoving,
       };
     });
@@ -266,8 +269,8 @@ export class LiuYaoChart {
       yaos: this.yaos.map((yao) => {
         const branch = branches[yao.position];
         const changedBranch = changedBranches[yao.position];
-        const element = BRANCH_ELEMENTS[branch];
-        const changedElement = BRANCH_ELEMENTS[changedBranch];
+        const element = branch2Element(branch);
+        const changedElement = branch2Element(changedBranch);
         const relative = getRelative(world.palaceElement, element);
         const traces = evaluateYaoRules({
           calendar,
@@ -279,11 +282,11 @@ export class LiuYaoChart {
           yao: ruleYaos[yao.position],
           month: {
             branch: monthBranch,
-            element: BRANCH_ELEMENTS[monthBranch],
+            element: branch2Element(monthBranch),
           },
           day: {
             branch: dayBranch,
-            element: BRANCH_ELEMENTS[dayBranch],
+            element: branch2Element(dayBranch),
           },
           voidBranches: calendar.voidBranches,
         });
