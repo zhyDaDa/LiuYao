@@ -5,20 +5,20 @@ export function CalendarPanel({ snapshot }: { snapshot: ChartSnapshot }) {
     <div className="chart-side">
       <div className="calendar-band">
         <div>
-          <span>{snapshot.calendar.year}年</span>
-          <strong>{snapshot.calendar.yearVoidBranches.join("")}</strong>
+          <strong>{snapshot.calendar.year}</strong>
+          <span>年</span>
         </div>
         <div>
-          <span>{snapshot.calendar.month}月</span>
-          <strong>{snapshot.calendar.monthVoidBranches.join("")}</strong>
+          <strong>{snapshot.calendar.month}</strong>
+          <span>月</span>
         </div>
         <div>
-          <span>{snapshot.calendar.day}日</span>
+          <strong>{snapshot.calendar.day}</strong>
+          <span>日</span>
+        </div>
+        <div>
+          <span>旬空：</span>
           <strong>{snapshot.calendar.dayVoidBranches.join("")}</strong>
-        </div>
-        <div>
-          <span>日旬空</span>
-          <strong>{snapshot.calendar.voidBranches.join("、")}</strong>
         </div>
       </div>
 

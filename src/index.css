@@ -192,7 +192,7 @@ h2 {
 }
 
 .calendar-band {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .calendar-band div,
@@ -266,6 +266,14 @@ h2 {
   background: var(--surface-soft);
 }
 
+.board-head span {
+  min-width: 0;
+}
+
+.board-head span:nth-child(n + 2) {
+  text-align: center;
+}
+
 .yao-row {
   position: relative;
   width: 100%;
@@ -294,38 +302,48 @@ h2 {
 }
 
 .gua-line-cell {
-  display: grid;
-  grid-template-columns: minmax(58px, 1fr) 58px 16px;
+  display: flex;
   align-items: center;
-  gap: 3px;
+  justify-content: center;
+  gap: 0;
   min-width: 0;
   padding: 2px 3px;
   border-radius: 5px;
 }
 
 .gua-line-cell.force-旺 {
-  box-shadow: inset 3px 0 0 rgba(185, 67, 53, 0.82);
+  --force-color: rgba(185, 67, 53, 0.82);
 }
 
 .gua-line-cell.force-衰 {
-  box-shadow: inset 3px 0 0 rgba(49, 122, 86, 0.82);
+  --force-color: rgba(49, 122, 86, 0.82);
 }
 
 .gua-text {
+  flex: 0 1 auto;
   min-width: 0;
 }
 
 .gua-text b {
-  display: block;
+  display: inline-block;
   overflow: hidden;
+  max-width: 100%;
   color: var(--ink);
   font-size: 13px;
   font-weight: 500;
+  line-height: 1.45;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+.gua-line-cell.force-旺 .gua-text b,
+.gua-line-cell.force-衰 .gua-text b {
+  padding-bottom: 1px;
+  border-bottom: 2px solid var(--force-color);
+}
+
 .role-mark {
+  flex: 0 0 auto;
   min-width: 16px;
   color: var(--ink);
   font-size: 16px;
@@ -335,12 +353,14 @@ h2 {
 
 .line {
   display: grid;
+  flex: 0 0 auto;
   grid-template-columns: 1fr;
   gap: 0;
   align-items: center;
   width: 58px;
   height: 12px;
   margin-top: 0;
+  margin-left: 4px;
 }
 
 .line i {
@@ -470,8 +490,11 @@ h2 {
 
 .expanded-stage .calendar-band,
 .expanded-stage .gua-summary {
-  grid-template-columns: 1fr;
   gap: 6px;
+}
+
+.expanded-stage .gua-summary {
+  grid-template-columns: 1fr;
 }
 
 .expanded-stage .calendar-band div {
@@ -875,8 +898,7 @@ h2 {
   }
 
   .gua-line-cell {
-    grid-template-columns: minmax(120px, 1fr) 82px 22px;
-    gap: 8px;
+    gap: 0;
   }
 
   .line {
@@ -916,7 +938,7 @@ h2 {
   }
 
   .expanded-stage .calendar-band {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
   .expanded-stage .chart-layout {
@@ -939,6 +961,6 @@ h2 {
   }
 
   .expanded-stage .gua-line-cell {
-    grid-template-columns: minmax(120px, 1fr) 78px 22px;
+    gap: 0;
   }
 }
