@@ -1,5 +1,8 @@
 import { Modal } from "antd-mobile";
 import { TapButton } from "../components/TapButton";
+import { Typography } from "antd";
+
+const { Paragraph, Title, Text, Link } = Typography;
 
 export function HomePage({
   onCast,
@@ -30,19 +33,29 @@ export function HomePage({
     <section className="page home-page">
       <div className="page-title">
         <span className="eyebrow">LiuYao</span>
-        <h1>周易六爻排盘</h1>
-        <p>移动端优先的起卦、排盘、归档与规则追踪原型。</p>
+        <Title level={1}>周易六爻排盘</Title>
+        <Text type="secondary">
+          移动端优先的起卦、排盘、归档与规则追踪原型。
+        </Text>
       </div>
 
       <div className="panel version-panel">
         <div>
-          <h2>版本信息</h2>
-          <p>
-            当前版本 0.1.0-alpha，已包含基础模型、响应式盘面和规则说明入口。
-          </p>
+          <Title level={2}>版本信息</Title>
+          <Paragraph>
+            当前版本 0.2.0-alpha，已包含:
+            <ul>
+              <li>自动起卦</li>
+              <li>基本排盘</li>
+              <li>存档管理</li>
+              <li>速查表格</li>
+            </ul>
+          </Paragraph>
         </div>
         <div className="button-row">
-          <TapButton onTap={onCast}>起一卦</TapButton>
+          <TapButton color="primary" onTap={onCast}>
+            起一卦
+          </TapButton>
           <TapButton fill="outline" onTap={showDebug}>
             调试
           </TapButton>
@@ -50,10 +63,13 @@ export function HomePage({
       </div>
 
       <div className="panel about-panel">
-        <h2>关于与发布信息</h2>
-        <p>
-          这里预留作者介绍、联系方式、版本更新与发布说明。正式发布时可以接入网站链接或二维码。
-        </p>
+        <Title level={2}>关于与发布信息</Title>
+        <Paragraph>
+          作者: <Text strong>zhyDaDa</Text>
+        </Paragraph>
+        <Paragraph>
+          官网: <Link href="origin.zhydada.com">origin.zhyDaDa.com</Link>
+        </Paragraph>
       </div>
     </section>
   );

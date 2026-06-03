@@ -1,0 +1,64 @@
+.popupBody {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 18px 16px 28px;
+  overflow-y: auto;
+}
+
+.header {
+  display: grid;
+  gap: 8px;
+}
+
+.eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+}
+
+.section {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 16px;
+  background: #f7f9f9;
+}
+
+.sectionTitle {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.sectionDesc {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.manualList {
+  display: grid;
+  gap: 10px;
+}
+
+.manualRow {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  align-items: center;
+  gap: 12px;
+}
+
+.manualLabel {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.manualButton {
+  width: 100%;
+  justify-content: space-between;
+}
+
+.manualActions {
+  display: flex;
+  justify-content: flex-end;
+}

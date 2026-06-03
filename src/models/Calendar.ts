@@ -12,7 +12,6 @@ export interface CalendarInfo {
   dayVoidBranches: VoidBranches;
   hourVoidBranches: VoidBranches;
   voidBranches: VoidBranches;
-  note: string;
 }
 
 const JIA_ZI: GanZhiName[] = Array.from(
@@ -58,7 +57,6 @@ export class LiuYaoTime {
       dayVoidBranches: getVoidBranches(dayGanZhiIndex),
       hourVoidBranches: getVoidBranches(JIA_ZI.indexOf(hourGanZhi)),
       voidBranches: getVoidBranches(dayGanZhiIndex),
-      note: "月柱暂按公历月份近似，后续可接入精确节气库。",
     };
   }
 }
