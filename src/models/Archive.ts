@@ -57,7 +57,10 @@ export function applyArchiveDraft(
     draft.remark.trim(),
   );
 
-  return chart.toSnapshot();
+  return {
+    ...chart.toSnapshot(),
+    useYaoPosition: snapshot.useYaoPosition ?? null,
+  };
 }
 
 function archiveYaoValueToYao(value: ArchiveYaoValue, position: number) {

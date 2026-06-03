@@ -23,7 +23,11 @@ function App() {
   const [archiveEdit, setArchiveEdit] = useState<ChartSnapshot | null>(null);
   const [expanded, setExpanded] = useState(false);
   const [castVisible, setCastVisible] = useState(false);
-  const snapshot = useMemo(() => chart?.toSnapshot() ?? null, [chart]);
+  const [useYaoPosition, setUseYaoPosition] = useState<number | null>(null);
+  const snapshot = useMemo(
+    () => (chart ? { ...chart.toSnapshot(), useYaoPosition } : null),
+    [chart, useYaoPosition],
+  );
 
   function openCastPopup() {
     setCastVisible(true);
@@ -36,6 +40,7 @@ function App() {
   function castRandom() {
     const next = LiuYaoChart.random("随机起卦");
     setChart(next);
+    setUseYaoPosition(null);
     setActiveKey("divine");
     setCastVisible(false);
     Toast.show({ content: "已完成一次随机起卦" });
@@ -48,6 +53,7 @@ function App() {
     );
     const next = new LiuYaoChart(yaos, "手动起卦");
     setChart(next);
+    setUseYaoPosition(null);
     setActiveKey("divine");
     setCastVisible(false);
     Toast.show({ content: "已完成一次手动起卦" });
@@ -66,6 +72,7 @@ function App() {
 
   function loadArchive(item: ChartSnapshot) {
     setChart(LiuYaoChart.fromSnapshot(item));
+    setUseYaoPosition(item.useYaoPosition ?? null);
     setArchivePreview(null);
     setArchiveEdit(null);
     setActiveKey("divine");
@@ -113,6 +120,7 @@ function App() {
             onCast={openCastPopup}
             onSave={saveCurrent}
             onInspect={setSelectedYao}
+            onUseYao={setUseYaoPosition}
             expanded={expanded}
             onToggleExpanded={() => setExpanded((value) => !value)}
           />

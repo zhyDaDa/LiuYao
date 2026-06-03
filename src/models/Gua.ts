@@ -51,6 +51,7 @@ export interface ChartSnapshot {
   title: string;
   question: string;
   remark?: string;
+  useYaoPosition?: number | null;
   calendar: CalendarInfo;
   originalName: string;
   changedName: string;

@@ -8,6 +8,7 @@ export function DivinePage({
   onCast,
   onSave,
   onInspect,
+  onUseYao,
   expanded,
   onToggleExpanded,
 }: {
@@ -15,6 +16,7 @@ export function DivinePage({
   onCast: () => void;
   onSave: () => void;
   onInspect: (yao: YaoSnapshot) => void;
+  onUseYao: (position: number | null) => void;
   expanded: boolean;
   onToggleExpanded: () => void;
 }) {
@@ -39,6 +41,7 @@ export function DivinePage({
           <ChartView
             snapshot={snapshot}
             onInspect={onInspect}
+            onUseYao={onUseYao}
             expanded={expanded}
           />
           <FixedExpandButton expanded={expanded} onClick={onToggleExpanded} />
