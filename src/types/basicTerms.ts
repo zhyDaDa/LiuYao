@@ -60,6 +60,50 @@ export type StrengthLabel = (typeof STRENGTH_LABELS)[number];
 export const SKCH_EFFECTS = ["无", "生", "克", "冲", "合"] as const;
 export type SKCHEffect = (typeof SKCH_EFFECTS)[number];
 
+export const LIU_CHONG_GUA_NAMES = new Set<string>([
+  "乾为天",
+  "坤为地",
+  "震为雷",
+  "艮为山",
+  "巽为风",
+  "离为火",
+  "坎为水",
+  "兑为泽",
+]);
+
+export const LIU_HE_GUA_NAMES = new Set<string>([
+  "天地否",
+  "地天泰",
+  "地雷复",
+  "雷地豫",
+  "山火贲",
+  "火山旅",
+  "水泽节",
+  "泽水困",
+]);
+
+export const YOU_HUN_GUA_NAMES = new Set<string>([
+  "火地晋",
+  "水天需",
+  "泽风大过",
+  "山雷颐",
+  "地火明夷",
+  "天水讼",
+  "风泽中孚",
+  "雷山小过",
+]);
+
+export const GUI_HUN_GUA_NAMES = new Set<string>([
+  "火天大有",
+  "水地比",
+  "泽雷随",
+  "山风蛊",
+  "地水师",
+  "天火同人",
+  "风山渐",
+  "雷泽归妹",
+]);
+
 export const TRIGRAM_NAMES = [
   "乾",
   "兑",
@@ -87,3 +131,5 @@ export const FIVE_ELEMENT_CONTROLS: Record<ElementName, ElementName> = {
   火: "金",
   金: "木",
 };
+
+export type GuaSpecialType = "六合" | "六冲" | "游魂" | "归魂" | "";

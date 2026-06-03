@@ -6,6 +6,7 @@ import type {
   BranchName,
   ElementName,
   GanZhiName,
+  GuaSpecialType,
   RelativeName,
   SixSpiritName,
   StrengthLabel,
@@ -15,8 +16,12 @@ import type {
 import {
   FIVE_ELEMENT_CONTROLS,
   FIVE_ELEMENT_GENERATES,
+  GUI_HUN_GUA_NAMES,
+  LIU_CHONG_GUA_NAMES,
+  LIU_HE_GUA_NAMES,
   SIX_SPIRIT_NAMES,
   YAO_NAMES,
+  YOU_HUN_GUA_NAMES,
 } from "../types/basicTerms";
 import { branch2Element } from "../utils/branch2Element";
 import { createId } from "../utils/createId";
@@ -49,6 +54,8 @@ export interface ChartSnapshot {
   calendar: CalendarInfo;
   originalName: string;
   changedName: string;
+  originalType: GuaSpecialType;
+  changedType: GuaSpecialType;
   palace: TrigramName;
   changedPalace: TrigramName;
   palaceElement: ElementName;
@@ -238,6 +245,10 @@ export class LiuYaoChart {
   toSnapshot(): ChartSnapshot {
     const originalTrigrams = this.getTrigrams(this.yaos);
     const changedYaos = this.yaos.map((yao) => yao.changed());
+
+    const originalName = getGuaName(originalTrigrams);
+    const changedName = getGuaName(this.getTrigrams(changedYaos));
+
     const changedTrigrams = this.getTrigrams(changedYaos);
     const world = this.getWorldAndPalace(this.yaos);
     const changedWorld = this.getWorldAndPalace(changedYaos);
@@ -266,8 +277,10 @@ export class LiuYaoChart {
       question: this.question,
       remark: this.remark,
       calendar,
-      originalName: getGuaName(originalTrigrams),
-      changedName: getGuaName(changedTrigrams),
+      originalName,
+      changedName,
+      originalType: getGuaSpecialType(originalName),
+      changedType: getGuaSpecialType(changedName),
       palace: world.palace,
       changedPalace: changedWorld.palace,
       palaceElement: trigramElement(world.palace),
@@ -454,3 +467,16 @@ function toBit(yao: Yao) {
 function getGanZhiBranch(ganZhi: GanZhiName): BranchName {
   return ganZhi[1] as BranchName;
 }
+
+export const getGuaSpecialType = (guaName: string): GuaSpecialType => {
+  if (LIU_CHONG_GUA_NAMES.has(guaName)) {
+    return "六冲";
+  } else if (LIU_HE_GUA_NAMES.has(guaName)) {
+    return "六合";
+  } else if (YOU_HUN_GUA_NAMES.has(guaName)) {
+    return "游魂";
+  } else if (GUI_HUN_GUA_NAMES.has(guaName)) {
+    return "归魂";
+  }
+  return "";
+};

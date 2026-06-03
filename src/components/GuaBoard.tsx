@@ -25,7 +25,13 @@ export function GuaBoard({
   );
 }
 
-function YaoRow({ yao, onInspect }: { yao: YaoSnapshot; onInspect: (yao: YaoSnapshot) => void }) {
+function YaoRow({
+  yao,
+  onInspect,
+}: {
+  yao: YaoSnapshot;
+  onInspect: (yao: YaoSnapshot) => void;
+}) {
   const timerRef = useRef<number | null>(null);
 
   function startPress() {
@@ -48,18 +54,28 @@ function YaoRow({ yao, onInspect }: { yao: YaoSnapshot; onInspect: (yao: YaoSnap
       onPointerDown={startPress}
       onPointerUp={stopPress}
       onPointerLeave={stopPress}
-      title={yao.traces.map((trace) => `${trace.title}：${trace.reason}`).join("\n")}
+      title={yao.traces
+        .map((trace) => `${trace.title}：${trace.reason}`)
+        .join("\n")}
     >
       <span className="spirit">{yao.spirit}</span>
       <GuaLineCell yao={yao} />
-      <span className={yao.isMoving ? "move-mark is-moving" : "move-mark"}>{getMoveMark(yao)}</span>
+      <span className={yao.isMoving ? "move-mark is-moving" : "move-mark"}>
+        {getMoveMark(yao)}
+      </span>
       <GuaLineCell yao={yao} changed />
       <span className="hover-tip">{yao.traces[0]?.reason}</span>
     </button>
   );
 }
 
-function GuaLineCell({ yao, changed = false }: { yao: YaoSnapshot; changed?: boolean }) {
+function GuaLineCell({
+  yao,
+  changed = false,
+}: {
+  yao: YaoSnapshot;
+  changed?: boolean;
+}) {
   const strengthClass = !changed ? `force-${yao.strengthLabel}` : "";
   return (
     <span className={`gua-line-cell ${strengthClass}`}>

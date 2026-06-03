@@ -25,17 +25,27 @@ export function CalendarPanel({ snapshot }: { snapshot: ChartSnapshot }) {
       <div className="gua-summary">
         <div>
           <span>本卦</span>
-          <strong>{snapshot.originalName}</strong>
-          <em>{snapshot.palace}宫 {snapshot.palaceElement}</em>
+          <strong>
+            {snapshot.originalName}
+            {snapshot.originalType === "" ? "" : `(${snapshot.originalType})`}
+          </strong>
+
+          <em>
+            {snapshot.palace}宫 {snapshot.palaceElement}
+          </em>
         </div>
         <div>
           <span>变卦</span>
-          <strong>{snapshot.changedName}</strong>
-          <em>{snapshot.changedPalace}宫 {snapshot.changedPalaceElement}</em>
+          <strong>
+            {snapshot.changedName}
+            {snapshot.changedType === "" ? "" : `(${snapshot.changedType})`}
+          </strong>
+
+          <em>
+            {snapshot.changedPalace}宫 {snapshot.changedPalaceElement}
+          </em>
         </div>
       </div>
-
-      <p className="calendar-note">{snapshot.calendar.note}</p>
     </div>
   );
 }
