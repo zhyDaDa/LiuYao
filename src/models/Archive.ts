@@ -58,8 +58,7 @@ export function applyArchiveDraft(
   );
 
   return {
-    ...chart.toSnapshot(),
-    useYaoPosition: snapshot.useYaoPosition ?? null,
+    ...chart.toSnapshot(snapshot.useYaoPosition ?? null),
   };
 }
 

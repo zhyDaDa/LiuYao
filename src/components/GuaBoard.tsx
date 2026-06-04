@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import type { CSSProperties } from "react";
 import type { ChartSnapshot, YaoSnapshot } from "../models/Gua";
 
 export function GuaBoard({
@@ -16,7 +17,6 @@ export function GuaBoard({
       <div className="chart-board" aria-label="六爻排盘">
         <div className="board-head">
           <span>六神</span>
-          <span>用</span>
           <span>本卦</span>
           <span>动</span>
           <span>变卦</span>
@@ -87,7 +87,6 @@ function YaoRow({
         .join("\n")}
     >
       <span className="spirit">{yao.spirit}</span>
-      <span className="use-mark">{isUsed ? "用" : ""}</span>
       <GuaLineCell yao={yao} />
       <span className={yao.isMoving ? "move-mark is-moving" : "move-mark"}>
         {getMoveMark(yao)}
@@ -105,10 +104,20 @@ function GuaLineCell({
   yao: YaoSnapshot;
   changed?: boolean;
 }) {
-  const strengthClass = !changed ? `force-${yao.strengthLabel}` : "";
+  const strengthClass =
+    !changed && yao.useSpiritRole && yao.strength !== 0
+      ? `force-${getStrengthTone(yao.strength)}`
+      : "";
+  const useSpiritClass = !changed && yao.useSpiritRole ? "has-use-spirit" : "";
+  const useSpiritMarkClass =
+    !changed && yao.useSpiritRole ? getUseSpiritMarkClass(yao.useSpiritRole) : "";
   return (
-    <span className={`gua-line-cell ${strengthClass}`}>
-      <span className="gua-text">
+    <span className={`gua-line-cell ${strengthClass} ${useSpiritClass}`}>
+      <span
+        className={`gua-text ${useSpiritMarkClass}`}
+        data-use-spirit-role={!changed && yao.useSpiritRole ? yao.useSpiritRole : undefined}
+        style={getStrengthStyle(yao, changed)}
+      >
         <b>
           {changed ? yao.changedRelative : yao.relative}
           {changed ? yao.changedBranch : yao.branch}
@@ -133,4 +142,40 @@ function LineMark({ isYang }: { isYang: boolean }) {
 function getMoveMark(yao: YaoSnapshot) {
   if (!yao.isMoving) return "";
   return yao.isYang ? "○" : "×";
+}
+
+function getStrengthStyle(
+  yao: YaoSnapshot,
+  changed: boolean,
+): CSSProperties | undefined {
+  if (changed || !yao.useSpiritRole || yao.strength === 0) {
+    return undefined;
+  }
+
+  return {
+    "--force-opacity": getStrengthOpacity(yao.strength),
+  } as CSSProperties;
+}
+
+function getStrengthTone(strength: number) {
+  return strength > 0 ? "旺" : "衰";
+}
+
+function getStrengthOpacity(strength: number) {
+  const level = Math.min(Math.max(Math.abs(strength), 1), 10);
+  return `${level * 10}%`;
+}
+
+function getUseSpiritMarkClass(role: YaoSnapshot["useSpiritRole"]) {
+  switch (role) {
+    case "用":
+      return "is-use-role";
+    case "元":
+      return "is-origin-role";
+    case "忌":
+    case "仇":
+      return "is-counter-role";
+    default:
+      return "";
+  }
 }

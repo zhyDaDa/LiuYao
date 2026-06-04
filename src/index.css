@@ -11,11 +11,7 @@
   --ink: #151311;
   --shadow: 0 14px 34px rgba(44, 33, 21, 0.1);
   --nav-height: 66px;
-  font-family:
-    system-ui,
-    "Microsoft YaHei",
-    "PingFang SC",
-    sans-serif;
+  font-family: system-ui, "Microsoft YaHei", "PingFang SC", sans-serif;
   color: var(--text);
   background: var(--bg);
   font-synthesis: none;
@@ -65,7 +61,11 @@ h2 {
 .app {
   min-height: 100svh;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(244, 247, 247, 0.96)),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.92),
+      rgba(244, 247, 247, 0.96)
+    ),
     var(--bg);
 }
 
@@ -262,7 +262,6 @@ h2 {
 
 .board-head {
   padding: 9px 8px;
-  grid-template-columns: 36px 22px minmax(124px, 1fr) 22px minmax(124px, 1fr);
   color: var(--muted);
   font-size: 12px;
   background: var(--surface-soft);
@@ -288,6 +287,13 @@ h2 {
   background: transparent;
   cursor: pointer;
   touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.yao-row * {
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .yao-row:last-child {
@@ -298,24 +304,13 @@ h2 {
   background: rgba(185, 67, 53, 0.08);
 }
 
-.yao-row.is-used {
-  box-shadow: inset 0 0 0 2px rgba(185, 67, 53, 0.55);
-  border-radius: 6px;
-}
-
 .spirit {
   color: var(--muted);
   font-size: 13px;
 }
 
-.use-mark {
-  color: var(--red);
-  font-size: 13px;
-  font-weight: 700;
-  text-align: center;
-}
-
 .gua-line-cell {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -326,34 +321,74 @@ h2 {
 }
 
 .gua-line-cell.force-旺 {
-  --force-color: rgba(185, 67, 53, 0.82);
+  --force-color: rgba(185, 67, 53, var(--force-opacity, 10%));
 }
 
 .gua-line-cell.force-衰 {
-  --force-color: rgba(49, 122, 86, 0.82);
+  --force-color: rgba(49, 122, 86, var(--force-opacity, 10%));
 }
 
 .gua-text {
-  flex: 0 1 auto;
-  min-width: 0;
+  position: relative;
+  flex: 0 0 auto;
+  min-width: max-content;
+  border-radius: 4px;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .gua-text b {
   display: inline-block;
-  overflow: hidden;
-  max-width: 100%;
+  padding-inline: 3px;
+  border-radius: 4px;
   color: var(--ink);
   font-size: 13px;
   font-weight: 500;
   line-height: 1.45;
-  text-overflow: ellipsis;
+  background: transparent;
   white-space: nowrap;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .gua-line-cell.force-旺 .gua-text b,
 .gua-line-cell.force-衰 .gua-text b {
-  padding-bottom: 1px;
-  border-bottom: 2px solid var(--force-color);
+  background: var(--force-color);
+}
+
+.gua-text[data-use-spirit-role]::before {
+  content: attr(data-use-spirit-role);
+  position: absolute;
+  right: calc(100% - 2px);
+  top: 50%;
+  z-index: 1;
+  display: inline-grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+  color: var(--green);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  background: var(--surface);
+  transform: translateY(-50%);
+  user-select: none;
+  -webkit-user-select: none;
+  pointer-events: none;
+}
+
+.gua-text.is-use-role::before {
+  color: var(--ink);
+}
+
+.gua-text.is-origin-role::before {
+  color: var(--red);
+}
+
+.gua-text.is-counter-role::before {
+  color: var(--green);
 }
 
 .role-mark {
@@ -399,7 +434,10 @@ h2 {
 }
 
 .move-mark.is-moving {
-  transform: translateY(5px);
+  /* transform: translateY(5px); */
+  font-size: 1rem;
+  line-height: 2rem;
+  text-align: center;
 }
 
 .hover-tip {
@@ -901,7 +939,7 @@ h2 {
 
   .board-head,
   .yao-row {
-    grid-template-columns: 70px 30px minmax(250px, 1fr) 42px minmax(250px, 1fr);
+    grid-template-columns: 70px minmax(250px, 1fr) 42px minmax(250px, 1fr);
     gap: 12px;
   }
 
@@ -969,7 +1007,7 @@ h2 {
 
   .expanded-stage .board-head,
   .expanded-stage .yao-row {
-    grid-template-columns: 58px 26px minmax(224px, 1fr) 36px minmax(224px, 1fr);
+    grid-template-columns: 58px minmax(224px, 1fr) 36px minmax(224px, 1fr);
     gap: 10px;
   }
 

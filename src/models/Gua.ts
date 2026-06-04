@@ -11,9 +11,11 @@ import type {
   SixSpiritName,
   StrengthLabel,
   TrigramName,
+  UseSpiritRole,
   YaoRole,
 } from "../types/basicTerms";
 import {
+  ELEMENT_NAMES,
   FIVE_ELEMENT_CONTROLS,
   FIVE_ELEMENT_GENERATES,
   GUI_HUN_GUA_NAMES,
@@ -43,6 +45,7 @@ export interface YaoSnapshot {
   changedRole: YaoRole;
   strength: number;
   strengthLabel: StrengthLabel;
+  useSpiritRole: UseSpiritRole;
   traces: RuleTrace[];
 }
 
@@ -243,7 +246,7 @@ export class LiuYaoChart {
     );
   }
 
-  toSnapshot(): ChartSnapshot {
+  toSnapshot(useYaoPosition: number | null = null): ChartSnapshot {
     const originalTrigrams = this.getTrigrams(this.yaos);
     const changedYaos = this.yaos.map((yao) => yao.changed());
 
@@ -272,11 +275,80 @@ export class LiuYaoChart {
       };
     });
 
+    const yaos: YaoSnapshot[] = this.yaos.map((yao) => {
+      const branch = branches[yao.position];
+      const changedBranch = changedBranches[yao.position];
+      const element = branch2Element(branch);
+      const changedElement = branch2Element(changedBranch);
+      const relative = getRelative(world.palaceElement, element);
+      const traces = evaluateYaoRules({
+        calendar,
+        palace: world.palace,
+        palaceElement: world.palaceElement,
+        changedPalace: changedWorld.palace,
+        changedPalaceElement: changedWorld.palaceElement,
+        yaos: ruleYaos,
+        yao: ruleYaos[yao.position],
+        month: {
+          branch: monthBranch,
+          element: branch2Element(monthBranch),
+        },
+        day: {
+          branch: dayBranch,
+          element: branch2Element(dayBranch),
+        },
+        voidBranches: calendar.voidBranches,
+      });
+      const strength = traces.reduce((sum, trace) => sum + trace.effect, 0);
+
+      return {
+        position: yao.position,
+        name: YAO_NAMES[yao.position],
+        isYang: yao.isYang,
+        isMoving: yao.isMoving,
+        branch,
+        element,
+        relative,
+        spirit: spirits[yao.position],
+        role:
+          world.worldIndex === yao.position
+            ? "世"
+            : world.respondIndex === yao.position
+              ? "应"
+              : "",
+        changedBranch,
+        changedElement,
+        changedRelative: getRelative(
+          changedWorld.palaceElement,
+          changedElement,
+        ),
+        changedIsYang: changedYaos[yao.position].isYang,
+        changedRole:
+          changedWorld.worldIndex === yao.position
+            ? "世"
+            : changedWorld.respondIndex === yao.position
+              ? "应"
+              : "",
+        strength,
+        strengthLabel: strength >= 2 ? "旺" : strength <= -2 ? "衰" : "平",
+        useSpiritRole: "",
+        traces,
+      };
+    });
+    const useYao = yaos.find((yao) => yao.position === useYaoPosition);
+    const yaosWithUseSpirit = useYao
+      ? yaos.map((yao) => ({
+          ...yao,
+          useSpiritRole: getUseSpiritRole(yao, useYao),
+        }))
+      : yaos;
+
     return {
       id: this.id,
       title: this.title,
       question: this.question,
       remark: this.remark,
+      useYaoPosition,
       calendar,
       originalName,
       changedName,
@@ -286,65 +358,7 @@ export class LiuYaoChart {
       changedPalace: changedWorld.palace,
       palaceElement: trigramElement(world.palace),
       changedPalaceElement: trigramElement(changedWorld.palace),
-      yaos: this.yaos.map((yao) => {
-        const branch = branches[yao.position];
-        const changedBranch = changedBranches[yao.position];
-        const element = branch2Element(branch);
-        const changedElement = branch2Element(changedBranch);
-        const relative = getRelative(world.palaceElement, element);
-        const traces = evaluateYaoRules({
-          calendar,
-          palace: world.palace,
-          palaceElement: world.palaceElement,
-          changedPalace: changedWorld.palace,
-          changedPalaceElement: changedWorld.palaceElement,
-          yaos: ruleYaos,
-          yao: ruleYaos[yao.position],
-          month: {
-            branch: monthBranch,
-            element: branch2Element(monthBranch),
-          },
-          day: {
-            branch: dayBranch,
-            element: branch2Element(dayBranch),
-          },
-          voidBranches: calendar.voidBranches,
-        });
-        const strength = traces.reduce((sum, trace) => sum + trace.effect, 0);
-
-        return {
-          position: yao.position,
-          name: YAO_NAMES[yao.position],
-          isYang: yao.isYang,
-          isMoving: yao.isMoving,
-          branch,
-          element,
-          relative,
-          spirit: spirits[yao.position],
-          role:
-            world.worldIndex === yao.position
-              ? "世"
-              : world.respondIndex === yao.position
-                ? "应"
-                : "",
-          changedBranch,
-          changedElement,
-          changedRelative: getRelative(
-            changedWorld.palaceElement,
-            changedElement,
-          ),
-          changedIsYang: changedYaos[yao.position].isYang,
-          changedRole:
-            changedWorld.worldIndex === yao.position
-              ? "世"
-              : changedWorld.respondIndex === yao.position
-                ? "应"
-                : "",
-          strength,
-          strengthLabel: strength >= 2 ? "旺" : strength <= -2 ? "衰" : "平",
-          traces,
-        };
-      }),
+      yaos: yaosWithUseSpirit,
     };
   }
 
@@ -433,6 +447,27 @@ function getRelative(
   if (FIVE_ELEMENT_GENERATES[palaceElement] === yaoElement) return "子孙";
   if (FIVE_ELEMENT_CONTROLS[yaoElement] === palaceElement) return "官鬼";
   return "妻财";
+}
+
+function getUseSpiritRole(yao: YaoSnapshot, useYao: YaoSnapshot): UseSpiritRole {
+  if (yao.position === useYao.position) return "用";
+  if (FIVE_ELEMENT_GENERATES[yao.element] === useYao.element) return "元";
+  if (FIVE_ELEMENT_CONTROLS[yao.element] === useYao.element) return "忌";
+
+  const jiElement = getElementControlling(useYao.element);
+  if (FIVE_ELEMENT_GENERATES[yao.element] === jiElement) return "仇";
+
+  return "";
+}
+
+function getElementControlling(element: ElementName): ElementName {
+  const controller = ELEMENT_NAMES.find(
+    (item) => FIVE_ELEMENT_CONTROLS[item] === element,
+  );
+  if (!controller) {
+    throw new Error(`未知五行克制关系：${element}`);
+  }
+  return controller;
 }
 
 function trigramByBits(bits: string): TrigramInfo {

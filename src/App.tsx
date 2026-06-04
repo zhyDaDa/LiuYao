@@ -25,7 +25,7 @@ function App() {
   const [castVisible, setCastVisible] = useState(false);
   const [useYaoPosition, setUseYaoPosition] = useState<number | null>(null);
   const snapshot = useMemo(
-    () => (chart ? { ...chart.toSnapshot(), useYaoPosition } : null),
+    () => (chart ? chart.toSnapshot(useYaoPosition) : null),
     [chart, useYaoPosition],
   );
 

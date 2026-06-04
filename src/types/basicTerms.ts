@@ -54,6 +54,9 @@ export type SixSpiritName = (typeof SIX_SPIRIT_NAMES)[number];
 export const YAO_ROLES = ["世", "应", ""] as const;
 export type YaoRole = (typeof YAO_ROLES)[number];
 
+export const USE_SPIRIT_ROLES = ["用", "元", "忌", "仇", ""] as const;
+export type UseSpiritRole = (typeof USE_SPIRIT_ROLES)[number];
+
 export const STRENGTH_LABELS = ["旺", "平", "衰"] as const;
 export type StrengthLabel = (typeof STRENGTH_LABELS)[number];
 
