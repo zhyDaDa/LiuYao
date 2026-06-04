@@ -2,6 +2,7 @@ import type { CalendarInfo } from "./Calendar";
 import { LiuYaoTime } from "./Calendar";
 import type { RuleTrace, RuleYaoContext } from "./Rules";
 import { evaluateRulePipeline, isTraceTargetingYao } from "./Rules";
+import type { YaoPositionCategory } from "./YaoPositionImages";
 import type {
   BranchName,
   ElementName,
@@ -56,6 +57,7 @@ export interface ChartSnapshot {
   question: string;
   remark?: string;
   useYaoPosition?: number | null;
+  yaoPositionCategory?: YaoPositionCategory;
   calendar: CalendarInfo;
   originalName: string;
   changedName: string;
@@ -247,7 +249,10 @@ export class LiuYaoChart {
     );
   }
 
-  toSnapshot(useYaoPosition: number | null = null): ChartSnapshot {
+  toSnapshot(
+    useYaoPosition: number | null = null,
+    yaoPositionCategory?: YaoPositionCategory,
+  ): ChartSnapshot {
     const originalTrigrams = this.getTrigrams(this.yaos);
     const changedYaos = this.yaos.map((yao) => yao.changed());
 
@@ -266,12 +271,17 @@ export class LiuYaoChart {
     const ruleYaos: RuleYaoContext[] = this.yaos.map((yao) => {
       const branch = branches[yao.position];
       const changedBranch = changedBranches[yao.position];
+      const element = branch2Element(branch);
+      const changedElement = branch2Element(changedBranch);
       return {
         position: yao.position,
+        spirit: spirits[yao.position],
         branch,
-        element: branch2Element(branch),
+        element,
+        relative: getRelative(world.palaceElement, element),
         changedBranch,
-        changedElement: branch2Element(changedBranch),
+        changedElement,
+        changedRelative: getRelative(changedWorld.palaceElement, changedElement),
         isMoving: yao.isMoving,
         isDarkMoving: false,
       };
@@ -292,6 +302,7 @@ export class LiuYaoChart {
         element: branch2Element(dayBranch),
       },
       voidBranches: calendar.voidBranches,
+      yaoPositionCategory,
     });
     const ruleTraces = ruleEvaluation.traces;
     const evaluatedRuleYaos = ruleEvaluation.context.yaos;
@@ -357,6 +368,7 @@ export class LiuYaoChart {
       question: this.question,
       remark: this.remark,
       useYaoPosition,
+      yaoPositionCategory,
       calendar,
       originalName,
       changedName,

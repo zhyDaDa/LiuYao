@@ -2,6 +2,8 @@ import { ChartView } from "../components/ChartView";
 import { FixedExpandButton } from "../components/FixedExpandButton";
 import { TapButton } from "../components/TapButton";
 import type { ChartSnapshot, YaoSnapshot } from "../models/Gua";
+import type { YaoPositionCategory } from "../models/YaoPositionImages";
+import { YAO_POSITION_CATEGORY_OPTIONS } from "../models/YaoPositionImages";
 
 export function DivinePage({
   snapshot,
@@ -9,6 +11,8 @@ export function DivinePage({
   onSave,
   onInspect,
   onUseYao,
+  yaoPositionCategory,
+  onYaoPositionCategoryChange,
   expanded,
   onToggleExpanded,
 }: {
@@ -17,6 +21,8 @@ export function DivinePage({
   onSave: () => void;
   onInspect: (yao: YaoSnapshot) => void;
   onUseYao: (position: number | null) => void;
+  yaoPositionCategory: YaoPositionCategory;
+  onYaoPositionCategoryChange: (category: YaoPositionCategory) => void;
   expanded: boolean;
   onToggleExpanded: () => void;
 }) {
@@ -34,6 +40,23 @@ export function DivinePage({
         <TapButton fill="outline" onTap={onSave}>
           存档
         </TapButton>
+        <label className="category-select">
+          <span>本卦范畴</span>
+          <select
+            value={yaoPositionCategory}
+            onChange={(event) =>
+              onYaoPositionCategoryChange(
+                event.target.value as YaoPositionCategory,
+              )
+            }
+          >
+            {YAO_POSITION_CATEGORY_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </label>
       </div>
 
       {snapshot ? (

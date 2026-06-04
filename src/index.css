@@ -172,6 +172,33 @@ h2 {
   backdrop-filter: blur(14px);
 }
 
+.category-select {
+  display: inline-grid;
+  grid-template-columns: auto minmax(118px, 150px);
+  align-items: center;
+  gap: 7px;
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.category-select span {
+  color: var(--muted);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.category-select select {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  color: var(--ink);
+  background: transparent;
+  outline: 0;
+}
+
 .chart-stage {
   position: relative;
   text-align: left;

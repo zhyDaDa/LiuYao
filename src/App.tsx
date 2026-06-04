@@ -8,6 +8,8 @@ import { YaoDrawer } from "./components/YaoDrawer";
 import { readArchive, writeArchive } from "./models/Archive";
 import type { ChartSnapshot, YaoSnapshot } from "./models/Gua";
 import { LiuYaoChart, Yao } from "./models/Gua";
+import type { YaoPositionCategory } from "./models/YaoPositionImages";
+import { DEFAULT_YAO_POSITION_CATEGORY } from "./models/YaoPositionImages";
 import { ArchivePage } from "./pages/ArchivePage";
 import { DivinePage } from "./pages/DivinePage";
 import { HomePage } from "./pages/HomePage";
@@ -24,9 +26,11 @@ function App() {
   const [expanded, setExpanded] = useState(false);
   const [castVisible, setCastVisible] = useState(false);
   const [useYaoPosition, setUseYaoPosition] = useState<number | null>(null);
+  const [yaoPositionCategory, setYaoPositionCategory] =
+    useState<YaoPositionCategory>(DEFAULT_YAO_POSITION_CATEGORY);
   const snapshot = useMemo(
-    () => (chart ? chart.toSnapshot(useYaoPosition) : null),
-    [chart, useYaoPosition],
+    () => (chart ? chart.toSnapshot(useYaoPosition, yaoPositionCategory) : null),
+    [chart, useYaoPosition, yaoPositionCategory],
   );
 
   function openCastPopup() {
@@ -73,6 +77,9 @@ function App() {
   function loadArchive(item: ChartSnapshot) {
     setChart(LiuYaoChart.fromSnapshot(item));
     setUseYaoPosition(item.useYaoPosition ?? null);
+    setYaoPositionCategory(
+      item.yaoPositionCategory ?? DEFAULT_YAO_POSITION_CATEGORY,
+    );
     setArchivePreview(null);
     setArchiveEdit(null);
     setActiveKey("divine");
@@ -89,6 +96,9 @@ function App() {
     setArchivePreview((current) => (current?.id === item.id ? item : current));
     if (chart?.id === item.id) {
       setChart(LiuYaoChart.fromSnapshot(item));
+      setYaoPositionCategory(
+        item.yaoPositionCategory ?? DEFAULT_YAO_POSITION_CATEGORY,
+      );
     }
     Toast.show({ content: "已更新历史排盘" });
   }
@@ -121,6 +131,8 @@ function App() {
             onSave={saveCurrent}
             onInspect={setSelectedYao}
             onUseYao={setUseYaoPosition}
+            yaoPositionCategory={yaoPositionCategory}
+            onYaoPositionCategoryChange={setYaoPositionCategory}
             expanded={expanded}
             onToggleExpanded={() => setExpanded((value) => !value)}
           />

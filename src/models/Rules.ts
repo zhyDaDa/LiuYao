@@ -2,17 +2,32 @@ import type { CalendarInfo } from "./Calendar";
 import type {
   BranchName,
   ElementName,
+  RelativeName,
+  SixSpiritName,
   SKCHEffect,
   TrigramName,
   VoidBranches,
 } from "../types/basicTerms";
-import { YAO_NAMES } from "../types/basicTerms";
+import {
+  FIVE_ELEMENT_CONTROLS,
+  FIVE_ELEMENT_GENERATES,
+  YAO_NAMES,
+} from "../types/basicTerms";
+import { getRelativeChangeReference } from "./RelativeImages";
+import { getSixSpiritImage } from "./SixSpiritImages";
+import type { YaoPositionCategory } from "./YaoPositionImages";
+import { getYaoPositionImage } from "./YaoPositionImages";
 import { compareYaoForSKCH, isBranchClash } from "../utils/SKCH";
 import { BE_pair } from "../utils/branch2Element";
 
 // 作用的主体
 export type RuleActorKind = "yao" | "changedYao" | "month" | "day" | "void";
-export type RuleEffect = Exclude<SKCHEffect, "无"> | "空亡" | "暗动";
+export type RuleEffect =
+  | Exclude<SKCHEffect, "无">
+  | "空亡"
+  | "暗动"
+  | "三合局"
+  | "参考";
 
 export interface RuleActor {
   id: string;
@@ -40,10 +55,13 @@ export interface RuleTrace {
 
 export interface RuleYaoContext {
   position: number;
+  spirit: SixSpiritName;
   branch: BranchName;
   element: ElementName;
+  relative: RelativeName;
   changedBranch: BranchName;
   changedElement: ElementName;
+  changedRelative: RelativeName;
   isMoving: boolean;
   isDarkMoving: boolean;
 }
@@ -64,6 +82,7 @@ export interface RuleContext {
     element: ElementName;
   };
   voidBranches: VoidBranches;
+  yaoPositionCategory?: YaoPositionCategory;
 }
 
 export type RuleResult = RuleTrace | RuleTrace[] | null;
@@ -76,11 +95,32 @@ export interface RuleEvaluation {
   traces: RuleTrace[];
 }
 
+interface SanHeGroup {
+  branches: readonly [BranchName, BranchName, BranchName];
+  element: ElementName;
+}
+
+interface SanHeParticipant {
+  branch: BranchName;
+  element: ElementName;
+  actor: RuleActor;
+  priority: number;
+  isYaoRelated: boolean;
+  isActivatedByYao: boolean;
+}
+
+const SAN_HE_GROUPS: readonly SanHeGroup[] = [
+  { branches: ["亥", "卯", "未"], element: "木" },
+  { branches: ["寅", "午", "戌"], element: "火" },
+  { branches: ["巳", "酉", "丑"], element: "金" },
+  { branches: ["申", "子", "辰"], element: "水" },
+];
+
 // notice: 前置规则
 export const contextRules: RuleEntry<ContextRule>[] = [
   [
     darkMovingRule,
-    "暗动：静爻被月建冲起时，先标记为暗动，让它在后续规则中作为有效动爻发生作用。",
+    "暗动：旺相静爻被日辰冲起时，先标记为暗动，让它在后续规则中作为有效动爻发生作用；休囚被日冲不入局。",
   ],
 ];
 
@@ -90,10 +130,7 @@ export const ruleSet: RuleEntry<Rule>[] = [
     monthInfluenceRule,
     "月建生克冲合：判断月建对每一爻的生、克、冲、合影响；月建冲爻时记为月破。",
   ],
-  [
-    dayInfluenceRule,
-    "日辰生克冲合：判断日辰对每一爻的生、克、冲、合影响。",
-  ],
+  [dayInfluenceRule, "日辰生克冲合：判断日辰对每一爻的生、克、冲、合影响。"],
   [
     movingYaoRule,
     "动爻作用：明动爻和暗动爻会作为作用方，对其他爻产生生、克、冲、合关系。",
@@ -103,14 +140,32 @@ export const ruleSet: RuleEntry<Rule>[] = [
     "回头生克冲合：明动爻的变出之爻会回头作用本爻，产生生、克、冲、合关系。",
   ],
   [
-    voidBranchRule,
-    "旬空：本爻地支落入当前旬空时，标记为空亡并降低参考分。",
+    sanHeRule,
+    "三合局：明动、暗动、动爻变爻、日辰、月建凑齐亥卯未、寅午戌、巳酉丑、申子辰时成局；日破与旬空被克之爻不入局。",
+  ],
+  [voidBranchRule, "旬空：本爻地支落入当前旬空时，标记为空亡并降低参考分。"],
+];
+
+// notice: 参考规则只提供取象提示，不参与生克冲合和旺衰判断
+export const referenceRules: RuleEntry<Rule>[] = [
+  [
+    relativeChangeReferenceRule,
+    "六亲互化参考：动爻六亲化出变爻六亲时，提示变化过程和取象方向；此规则只作参考说明。",
+  ],
+  [
+    yaoPositionReferenceRule,
+    "爻位取象参考：按当前本卦范畴提示每个爻位可能对应的人事物象；此规则只作参考说明。",
+  ],
+  [
+    sixSpiritReferenceRule,
+    "六神取象参考：按每个爻所临六神提示可能对应的象意；此规则只作参考说明。",
   ],
 ];
 
 export const enabledRuleExplanations = [
   ...contextRules.map(([, explanation]) => explanation),
   ...ruleSet.map(([, explanation]) => explanation),
+  ...referenceRules.map(([, explanation]) => explanation),
 ];
 
 export function evaluateRules(context: RuleContext): RuleTrace[] {
@@ -144,6 +199,11 @@ export function evaluateRulePipeline(context: RuleContext): RuleEvaluation {
         if (!result) return [];
         return Array.isArray(result) ? result : [result];
       }),
+      ...referenceRules.flatMap(([rule]) => {
+        const result = rule(staged.context);
+        if (!result) return [];
+        return Array.isArray(result) ? result : [result];
+      }),
     ],
   };
 }
@@ -154,17 +214,22 @@ export function isTraceTargetingYao(
 ): boolean {
   const targets = Array.isArray(trace.target) ? trace.target : [trace.target];
   return targets.some(
-    (actor) => actor.kind === "yao" && actor.position === position,
+    (actor) =>
+      (actor.kind === "yao" || actor.kind === "changedYao") &&
+      actor.position === position,
   );
 }
 
-// 暗动：静爻被月建冲起，先转成后续规则可识别的有效动爻
+// 暗动：旺相静爻被日辰冲起，先转成后续规则可识别的有效动爻
 function darkMovingRule(context: RuleContext): RuleEvaluation {
-  const source = createActor("month", { branch: context.month.branch });
+  const source = createActor("day", { branch: context.day.branch });
   const traces: RuleTrace[] = [];
   const yaos = context.yaos.map((yao) => {
     if (yao.isMoving || yao.isDarkMoving) return yao;
-    if (!isBranchClash(context.month.branch, yao.branch)) return yao;
+    if (!isBranchClash(context.day.branch, yao.branch)) return yao;
+    if (!isElementProsperousByMonth(yao.element, context.month.element)) {
+      return yao;
+    }
 
     const darkMovingYao = { ...yao, isDarkMoving: true };
     const target = createActor("yao", {
@@ -177,7 +242,7 @@ function darkMovingRule(context: RuleContext): RuleEvaluation {
       target,
       effect: "暗动",
       score: 0,
-      reason: `${target.label}[${target.be_pair}]静而受${source.label}[${source.be_pair}]冲，作暗动论`,
+      reason: `${target.label}[${target.be_pair}]静而旺相，受${source.label}[${source.be_pair}]冲起，作暗动论`,
     });
     return darkMovingYao;
   });
@@ -259,6 +324,40 @@ function backInfluenceRule(context: RuleContext): RuleTrace[] {
   });
 }
 
+// 三合局
+function sanHeRule(context: RuleContext): RuleTrace[] {
+  const participants = createSanHeParticipants(context);
+
+  return SAN_HE_GROUPS.flatMap((group) => {
+    const selected = group.branches
+      .map((branch) => selectSanHeParticipant(branch, participants))
+      .filter((participant): participant is SanHeParticipant =>
+        Boolean(participant),
+      );
+
+    if (selected.length !== group.branches.length) return [];
+    if (!selected.some((participant) => participant.isActivatedByYao)) {
+      return [];
+    }
+
+    const actors = selected.map((participant) => participant.actor);
+    const targetActors = selected
+      .filter((participant) => participant.isYaoRelated)
+      .map((participant) => participant.actor);
+
+    return [
+      {
+        title: `三合${group.element}局`,
+        source: actors,
+        target: targetActors.length > 0 ? targetActors : actors,
+        effect: "三合局",
+        score: 3,
+        reason: `${group.branches.join("、")}三支齐备，合成${group.element}局，主多方聚合、合伙促成或长期成势`,
+      },
+    ];
+  });
+}
+
 // 旬空
 function voidBranchRule(context: RuleContext): RuleResult {
   const source = createActor("void", { voidBranches: context.voidBranches });
@@ -279,6 +378,210 @@ function voidBranchRule(context: RuleContext): RuleResult {
       },
     ];
   });
+}
+
+// 六亲互化参考：仅为详情补充说明，不改变实际作用关系
+function relativeChangeReferenceRule(context: RuleContext): RuleTrace[] {
+  return context.yaos.flatMap((yao) => {
+    if (!yao.isMoving) return [];
+
+    const source = createActor("yao", {
+      position: yao.position,
+      branch: yao.branch,
+      label: `${YAO_NAMES[yao.position]}${yao.relative}`,
+    });
+    const target = createActor("changedYao", {
+      position: yao.position,
+      branch: yao.changedBranch,
+      label: `${YAO_NAMES[yao.position]}变${yao.changedRelative}`,
+    });
+
+    return [
+      {
+        title: `${yao.relative}化${yao.changedRelative}`,
+        source,
+        target,
+        effect: "参考",
+        score: 0,
+        reason: getRelativeChangeReference(yao.relative, yao.changedRelative),
+      },
+    ];
+  });
+}
+
+// 爻位取象参考：按当前占事范畴给每个爻补充象意提示
+function yaoPositionReferenceRule(context: RuleContext): RuleTrace[] {
+  if (!context.yaoPositionCategory) return [];
+
+  return context.yaos.map((yao) => {
+    const actor = createActor("yao", {
+      position: yao.position,
+      branch: yao.branch,
+    });
+
+    return {
+      title: `${YAO_NAMES[yao.position]}爻位取象`,
+      source: actor,
+      target: actor,
+      effect: "参考",
+      score: 0,
+      reason: `本卦范畴为「${context.yaoPositionCategory}」，${actor.label}可参考：${getYaoPositionImage(context.yaoPositionCategory, yao.position)}`,
+    };
+  });
+}
+
+// 六神取象参考：按每个爻所临六神补充象意提示
+function sixSpiritReferenceRule(context: RuleContext): RuleTrace[] {
+  return context.yaos.map((yao) => {
+    const actor = createActor("yao", {
+      position: yao.position,
+      branch: yao.branch,
+      label: `${YAO_NAMES[yao.position]}${yao.spirit}`,
+    });
+
+    return {
+      title: `${yao.spirit}取象`,
+      source: actor,
+      target: actor,
+      effect: "参考",
+      score: 0,
+      reason: `${actor.label}临${yao.spirit}，可参考：${getSixSpiritImage(yao.spirit)}`,
+    };
+  });
+}
+
+function createSanHeParticipants(context: RuleContext): SanHeParticipant[] {
+  const participants: SanHeParticipant[] = [];
+
+  context.yaos.forEach((yao) => {
+    if (
+      (yao.isMoving || yao.isDarkMoving) &&
+      !isYaoBrokenForSanHe(yao, context)
+    ) {
+      participants.push({
+        branch: yao.branch,
+        element: yao.element,
+        actor: createActor("yao", {
+          position: yao.position,
+          branch: yao.branch,
+          label: yao.isDarkMoving
+            ? `${YAO_NAMES[yao.position]}暗动`
+            : YAO_NAMES[yao.position],
+        }),
+        priority: yao.isDarkMoving ? 2 : 1,
+        isYaoRelated: true,
+        isActivatedByYao: true,
+      });
+    }
+
+    if (yao.isMoving && !isBranchBrokenForSanHe(yao.changedBranch, context)) {
+      participants.push({
+        branch: yao.changedBranch,
+        element: yao.changedElement,
+        actor: createActor("changedYao", {
+          position: yao.position,
+          branch: yao.changedBranch,
+        }),
+        priority: 3,
+        isYaoRelated: true,
+        isActivatedByYao: true,
+      });
+    }
+
+    if (
+      !yao.isMoving &&
+      !yao.isDarkMoving &&
+      isYaoValuedByDayOrMonth(yao, context) &&
+      !isYaoBrokenForSanHe(yao, context)
+    ) {
+      participants.push({
+        branch: yao.branch,
+        element: yao.element,
+        actor: createActor("yao", {
+          position: yao.position,
+          branch: yao.branch,
+          label: `${YAO_NAMES[yao.position]}${getValuedLabel(yao, context)}`,
+        }),
+        priority: 4,
+        isYaoRelated: true,
+        isActivatedByYao: false,
+      });
+    }
+  });
+
+  participants.push({
+    branch: context.day.branch,
+    element: context.day.element,
+    actor: createActor("day", { branch: context.day.branch }),
+    priority: 5,
+    isYaoRelated: false,
+    isActivatedByYao: false,
+  });
+
+  participants.push({
+    branch: context.month.branch,
+    element: context.month.element,
+    actor: createActor("month", { branch: context.month.branch }),
+    priority: 6,
+    isYaoRelated: false,
+    isActivatedByYao: false,
+  });
+
+  return participants;
+}
+
+function selectSanHeParticipant(
+  branch: BranchName,
+  participants: SanHeParticipant[],
+): SanHeParticipant | null {
+  return (
+    participants
+      .filter((participant) => participant.branch === branch)
+      .sort((a, b) => a.priority - b.priority)[0] ?? null
+  );
+}
+
+function isYaoValuedByDayOrMonth(
+  yao: RuleYaoContext,
+  context: RuleContext,
+): boolean {
+  return (
+    yao.branch === context.day.branch || yao.branch === context.month.branch
+  );
+}
+
+function getValuedLabel(yao: RuleYaoContext, context: RuleContext): string {
+  if (yao.branch === context.day.branch) return "值日";
+  return "值月";
+}
+
+function isYaoBrokenForSanHe(
+  yao: Pick<RuleYaoContext, "branch" | "element" | "isMoving" | "isDarkMoving">,
+  context: RuleContext,
+): boolean {
+  if (
+    !yao.isMoving &&
+    !yao.isDarkMoving &&
+    isBranchClash(context.day.branch, yao.branch) &&
+    !isElementProsperousByMonth(yao.element, context.month.element)
+  ) {
+    return true;
+  }
+
+  return isBranchBrokenForSanHe(yao.branch, context);
+}
+
+function isBranchBrokenForSanHe(
+  branch: BranchName,
+  context: RuleContext,
+): boolean {
+  if (!context.voidBranches.includes(branch)) return false;
+
+  const element = new BE_pair(branch).element;
+  return (
+    isElementControlling(context.day.element, element) ||
+    isElementControlling(context.month.element, element)
+  );
 }
 
 function createSKCHTrace(
@@ -345,6 +648,22 @@ function getSKCHReason(
     return `${targetActor.label}[${targetBE}]被${sourceActor.label}[${sourceBE}]克`;
   }
   return `${sourceActor.label}[${sourceBE}]${skch}${targetActor.label}[${targetBE}]`;
+}
+
+function isElementProsperousByMonth(
+  element: ElementName,
+  monthElement: ElementName,
+): boolean {
+  return (
+    element === monthElement || FIVE_ELEMENT_GENERATES[monthElement] === element
+  );
+}
+
+function isElementControlling(
+  sourceElement: ElementName,
+  targetElement: ElementName,
+): boolean {
+  return FIVE_ELEMENT_CONTROLS[sourceElement] === targetElement;
 }
 
 function createActor(

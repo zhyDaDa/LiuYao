@@ -58,7 +58,10 @@ export function applyArchiveDraft(
   );
 
   return {
-    ...chart.toSnapshot(snapshot.useYaoPosition ?? null),
+    ...chart.toSnapshot(
+      snapshot.useYaoPosition ?? null,
+      snapshot.yaoPositionCategory,
+    ),
   };
 }
 
