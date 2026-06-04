@@ -1,7 +1,7 @@
 import type { CalendarInfo } from "./Calendar";
 import { LiuYaoTime } from "./Calendar";
 import type { RuleTrace, RuleYaoContext } from "./Rules";
-import { evaluateYaoRules } from "./Rules";
+import { evaluateRulePipeline, isTraceTargetingYao } from "./Rules";
 import type {
   BranchName,
   ElementName,
@@ -33,6 +33,7 @@ export interface YaoSnapshot {
   name: string;
   isYang: boolean;
   isMoving: boolean;
+  isDarkMoving: boolean;
   branch: BranchName;
   element: ElementName;
   relative: RelativeName;
@@ -272,40 +273,47 @@ export class LiuYaoChart {
         changedBranch,
         changedElement: branch2Element(changedBranch),
         isMoving: yao.isMoving,
+        isDarkMoving: false,
       };
     });
+    const ruleEvaluation = evaluateRulePipeline({
+      calendar,
+      palace: world.palace,
+      palaceElement: world.palaceElement,
+      changedPalace: changedWorld.palace,
+      changedPalaceElement: changedWorld.palaceElement,
+      yaos: ruleYaos,
+      month: {
+        branch: monthBranch,
+        element: branch2Element(monthBranch),
+      },
+      day: {
+        branch: dayBranch,
+        element: branch2Element(dayBranch),
+      },
+      voidBranches: calendar.voidBranches,
+    });
+    const ruleTraces = ruleEvaluation.traces;
+    const evaluatedRuleYaos = ruleEvaluation.context.yaos;
 
     const yaos: YaoSnapshot[] = this.yaos.map((yao) => {
+      const ruleYao = evaluatedRuleYaos[yao.position];
       const branch = branches[yao.position];
       const changedBranch = changedBranches[yao.position];
       const element = branch2Element(branch);
       const changedElement = branch2Element(changedBranch);
       const relative = getRelative(world.palaceElement, element);
-      const traces = evaluateYaoRules({
-        calendar,
-        palace: world.palace,
-        palaceElement: world.palaceElement,
-        changedPalace: changedWorld.palace,
-        changedPalaceElement: changedWorld.palaceElement,
-        yaos: ruleYaos,
-        yao: ruleYaos[yao.position],
-        month: {
-          branch: monthBranch,
-          element: branch2Element(monthBranch),
-        },
-        day: {
-          branch: dayBranch,
-          element: branch2Element(dayBranch),
-        },
-        voidBranches: calendar.voidBranches,
-      });
-      const strength = traces.reduce((sum, trace) => sum + trace.effect, 0);
+      const traces = ruleTraces.filter((trace) =>
+        isTraceTargetingYao(trace, yao.position),
+      );
+      const strength = traces.reduce((sum, trace) => sum + trace.score, 0);
 
       return {
         position: yao.position,
         name: YAO_NAMES[yao.position],
         isYang: yao.isYang,
         isMoving: yao.isMoving,
+        isDarkMoving: ruleYao?.isDarkMoving ?? false,
         branch,
         element,
         relative,

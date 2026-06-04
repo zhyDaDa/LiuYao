@@ -88,7 +88,13 @@ function YaoRow({
     >
       <span className="spirit">{yao.spirit}</span>
       <GuaLineCell yao={yao} />
-      <span className={yao.isMoving ? "move-mark is-moving" : "move-mark"}>
+      <span
+        className={
+          yao.isMoving || yao.isDarkMoving
+            ? "move-mark is-moving"
+            : "move-mark"
+        }
+      >
         {getMoveMark(yao)}
       </span>
       <GuaLineCell yao={yao} changed />
@@ -140,6 +146,7 @@ function LineMark({ isYang }: { isYang: boolean }) {
 }
 
 function getMoveMark(yao: YaoSnapshot) {
+  if (yao.isDarkMoving) return "暗";
   if (!yao.isMoving) return "";
   return yao.isYang ? "○" : "×";
 }

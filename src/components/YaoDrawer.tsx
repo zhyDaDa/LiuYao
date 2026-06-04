@@ -1,5 +1,6 @@
 import { Popup } from "antd-mobile";
 import type { YaoSnapshot } from "../models/Gua";
+import type { RuleActor, RuleTrace } from "../models/Rules";
 import { TapButton } from "./TapButton";
 
 export function YaoDrawer({ yao, onClose }: { yao: YaoSnapshot | null; onClose: () => void }) {
@@ -14,6 +15,7 @@ export function YaoDrawer({ yao, onClose }: { yao: YaoSnapshot | null; onClose: 
             </h2>
             <p>
               当前判断：{yao.strengthLabel}，综合分 {yao.strength}
+              {yao.isDarkMoving ? "，暗动" : ""}
             </p>
           </div>
           <div className="trace-list">
@@ -21,8 +23,13 @@ export function YaoDrawer({ yao, onClose }: { yao: YaoSnapshot | null; onClose: 
               <div className="trace-item" key={index}>
                 <strong>
                   {trace.title}
-                  <em>{trace.effect > 0 ? `+${trace.effect}` : trace.effect}</em>
+                  <em>{trace.score > 0 ? `+${trace.score}` : trace.score}</em>
                 </strong>
+                <p>
+                  {formatRuleActors(trace.source)} → {formatRuleActors(trace.target)}
+                  {" · "}
+                  {trace.effect}
+                </p>
                 <p>{trace.reason}</p>
               </div>
             ))}
@@ -34,4 +41,13 @@ export function YaoDrawer({ yao, onClose }: { yao: YaoSnapshot | null; onClose: 
       )}
     </Popup>
   );
+}
+
+function formatRuleActors(actor: RuleTrace["source"] | RuleTrace["target"]) {
+  const actors = Array.isArray(actor) ? actor : [actor];
+  return actors.map(formatRuleActor).join("、");
+}
+
+function formatRuleActor(actor: RuleActor) {
+  return actor.be_pair ? `${actor.label}${actor.be_pair}` : actor.label;
 }

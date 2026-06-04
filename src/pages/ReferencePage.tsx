@@ -1,5 +1,6 @@
 import { BranchCycleTable } from "../components/BranchCycleTable";
 import { LookupCard } from "../components/LookupCard";
+import { enabledRuleExplanations } from "../models/Rules";
 
 export function TablesPage() {
   return (
@@ -10,6 +11,7 @@ export function TablesPage() {
       </div>
       <BranchCycleTable />
       <div className="lookup-grid">
+        <LookupCard title="已启用规则集" rows={enabledRuleExplanations} />
         <LookupCard title="地支五行" rows={["亥子：水", "寅卯：木", "巳午：火", "申酉：金", "辰戌丑未：土"]} />
         <LookupCard title="六亲" rows={["生我：父母", "同我：兄弟", "我生：子孙", "我克：妻财", "克我：官鬼"]} />
         <LookupCard title="旬空" rows={["甲子旬：戌亥", "甲戌旬：申酉", "甲申旬：午未", "甲午旬：辰巳", "甲辰旬：寅卯", "甲寅旬：子丑"]} />
