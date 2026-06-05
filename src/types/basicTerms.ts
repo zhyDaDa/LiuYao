@@ -35,6 +35,47 @@ export type VoidBranches = [BranchName, BranchName];
 export const ELEMENT_NAMES = ["木", "火", "土", "金", "水"] as const;
 export type ElementName = (typeof ELEMENT_NAMES)[number];
 
+export const LIFE_STAGE_NAMES = ["长生", "帝旺", "墓", "绝"] as const;
+export type LifeStageName = (typeof LIFE_STAGE_NAMES)[number];
+export type LifeStageBranches = Record<
+  ElementName,
+  Record<LifeStageName, BranchName>
+>;
+export type LifeStageMatches = Record<ElementName, LifeStageName | "">;
+
+export const LIFE_STAGE_BRANCHES = {
+  木: {
+    长生: "亥",
+    帝旺: "卯",
+    墓: "未",
+    绝: "申",
+  },
+  火: {
+    长生: "寅",
+    帝旺: "午",
+    墓: "戌",
+    绝: "亥",
+  },
+  土: {
+    长生: "申",
+    帝旺: "子",
+    墓: "辰",
+    绝: "巳",
+  },
+  金: {
+    长生: "巳",
+    帝旺: "酉",
+    墓: "丑",
+    绝: "寅",
+  },
+  水: {
+    长生: "申",
+    帝旺: "子",
+    墓: "辰",
+    绝: "巳",
+  },
+} as const satisfies LifeStageBranches;
+
 export const YIN_YANG_NAMES = ["阳", "阴"] as const;
 export type YinYang = (typeof YIN_YANG_NAMES)[number];
 

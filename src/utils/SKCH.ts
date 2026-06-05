@@ -1,4 +1,9 @@
-import { FIVE_ELEMENT_CONTROLS, FIVE_ELEMENT_GENERATES, type BranchName, type SKCHEffect } from "../types/basicTerms";
+import {
+  FIVE_ELEMENT_CONTROLS,
+  FIVE_ELEMENT_GENERATES,
+  type BranchName,
+  type SKCHEffect,
+} from "../types/basicTerms";
 import { branch2Element } from "./branch2Element";
 
 type BranchPair = readonly [BranchName, BranchName];
@@ -13,12 +18,12 @@ export const BRANCH_CLASH_PAIRS: BranchPair[] = [
 ];
 
 export const BRANCH_HARMONY_PAIRS: BranchPair[] = [
-  ["子", "亥"],
-  ["寅", "卯"],
-  ["巳", "午"],
-  ["申", "酉"],
-  ["辰", "丑"],
-  ["戌", "未"],
+  ["子", "丑"],
+  ["寅", "亥"],
+  ["卯", "戌"],
+  ["辰", "酉"],
+  ["巳", "申"],
+  ["午", "未"],
 ];
 
 export function compareYaoForSKCH(
@@ -45,11 +50,17 @@ export function compareYaoForSKCH(
   return "无";
 }
 
-export function isBranchClash(sourceBranch: BranchName, targetBranch: BranchName): boolean {
+export function isBranchClash(
+  sourceBranch: BranchName,
+  targetBranch: BranchName,
+): boolean {
   return hasBranchPair(BRANCH_CLASH_PAIRS, sourceBranch, targetBranch);
 }
 
-export function isBranchHarmony(sourceBranch: BranchName, targetBranch: BranchName): boolean {
+export function isBranchHarmony(
+  sourceBranch: BranchName,
+  targetBranch: BranchName,
+): boolean {
   return hasBranchPair(BRANCH_HARMONY_PAIRS, sourceBranch, targetBranch);
 }
 
@@ -61,7 +72,11 @@ export function findBranchHarmony(branch: BranchName): BranchName | null {
   return findBranchPartner(branch, BRANCH_HARMONY_PAIRS);
 }
 
-function hasBranchPair(pairs: BranchPair[], sourceBranch: BranchName, targetBranch: BranchName): boolean {
+function hasBranchPair(
+  pairs: BranchPair[],
+  sourceBranch: BranchName,
+  targetBranch: BranchName,
+): boolean {
   return pairs.some(
     ([left, right]) =>
       (left === sourceBranch && right === targetBranch) ||
@@ -69,8 +84,13 @@ function hasBranchPair(pairs: BranchPair[], sourceBranch: BranchName, targetBran
   );
 }
 
-function findBranchPartner(branch: BranchName, pairs: BranchPair[]): BranchName | null {
-  const pair = pairs.find(([left, right]) => left === branch || right === branch);
+function findBranchPartner(
+  branch: BranchName,
+  pairs: BranchPair[],
+): BranchName | null {
+  const pair = pairs.find(
+    ([left, right]) => left === branch || right === branch,
+  );
   if (!pair) return null;
   return pair[0] === branch ? pair[1] : pair[0];
 }

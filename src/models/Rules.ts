@@ -425,7 +425,7 @@ function yaoPositionReferenceRule(context: RuleContext): RuleTrace[] {
       target: actor,
       effect: "参考",
       score: 0,
-      reason: `本卦范畴为「${context.yaoPositionCategory}」，${actor.label}可参考：${getYaoPositionImage(context.yaoPositionCategory, yao.position)}`,
+      reason: `本卦范畴为「${context.yaoPositionCategory}」，${actor.label}可参考：${context.yaoPositionCategory?getYaoPositionImage(context.yaoPositionCategory, yao.position):"请先选择占事范畴"}`,
     };
   });
 }

@@ -1,6 +1,12 @@
 import type { ChartSnapshot } from "../models/Gua";
+import { TwelveLifeStages } from "./TwelveLifeStages";
 
 export function CalendarPanel({ snapshot }: { snapshot: ChartSnapshot }) {
+  const selectedUseYao = snapshot.yaos.find(
+    (yao) => yao.position === snapshot.useYaoPosition,
+  );
+  const lifeStageElement = selectedUseYao?.element ?? snapshot.palaceElement;
+
   return (
     <div className="chart-side">
       <div className="calendar-band">
@@ -21,6 +27,10 @@ export function CalendarPanel({ snapshot }: { snapshot: ChartSnapshot }) {
           <strong>{snapshot.calendar.dayVoidBranches.join("")}</strong>
         </div>
       </div>
+
+      <TwelveLifeStages
+        element={lifeStageElement}
+      />
 
       <div className="gua-summary">
         <div>
