@@ -4,6 +4,13 @@
   gap: 20px;
   padding: 18px 16px 28px;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.popupBody::-webkit-scrollbar {
+  display: none;
 }
 
 .header {
