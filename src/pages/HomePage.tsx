@@ -43,14 +43,14 @@ export function HomePage({
         <div>
           <Title level={2}>版本信息</Title>
           <Paragraph>
-            当前版本 0.2.2-alpha，已包含:
+            当前版本 0.2.3-alpha，已包含:
             <ul>
               <li>自动/手动起卦</li>
               <li>基本排盘</li>
               <li>十二长生</li>
               <li>存档管理</li>
               <li>速查表格</li>
-              <li>规则集优化[暗动]</li>
+              <li>规则集优化[增删全内容]</li>
             </ul>
           </Paragraph>
         </div>

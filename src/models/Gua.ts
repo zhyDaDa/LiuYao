@@ -166,7 +166,8 @@ const GUA_NAMES: Record<string, string> = {
   震艮: "雷山小过",
   坎离: "水火既济",
   离坎: "火水未济",
-};
+} as const;
+export type GuaName = typeof GUA_NAMES[keyof typeof GUA_NAMES];
 
 export class Yao {
   public readonly position: number;

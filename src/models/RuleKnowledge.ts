@@ -1,0 +1,504 @@
+export type RuleKnowledgeCategory =
+  | "起卦装卦"
+  | "用神体系"
+  | "生克旺衰"
+  | "动变"
+  | "冲合刑害"
+  | "空破墓绝"
+  | "应期"
+  | "取象参考";
+
+export interface RuleKnowledgeEntry {
+  id: string;
+  chapter: string;
+  title: string;
+  category: RuleKnowledgeCategory;
+  summary: string;
+  aiInstructions: readonly string[];
+  caveats: readonly string[];
+}
+
+export const aiRuleKnowledge = [
+  {
+    id: "chapter-004-najia",
+    chapter: "004",
+    title: "浑天甲子章",
+    category: "起卦装卦",
+    summary:
+      "浑天甲子为各卦纳干支之法，决定每爻地支与五行，是后续生克冲合、旬空、月破等规则的基础。",
+    aiInstructions: [
+      "所有生克冲合必须基于爻支和五行，不要只凭卦名断。",
+      "若排盘中纳甲信息缺失，应先要求补足或提示无法精断。",
+    ],
+    caveats: ["纳甲属于底层数据，错误时应优先修正排盘。"],
+  },
+  {
+    id: "chapter-005-six-relatives",
+    chapter: "005",
+    title: "六亲歌章",
+    category: "用神体系",
+    summary:
+      "六亲由卦宫五行与爻五行关系而来：同我为兄弟，生我为父母，我生为子孙，克我为官鬼，我克为妻财。",
+    aiInstructions: [
+      "按占事选择六亲用神，例如财利看妻财，功名官讼看官鬼，文书长辈看父母，子女医药解忧看子孙。",
+      "六亲也可取象，不同占事下同一六亲含义会变化。",
+    ],
+    caveats: ["六亲不是固定吉凶，必须结合问题语境。"],
+  },
+  {
+    id: "chapter-006-world-response",
+    chapter: "006",
+    title: "世应章",
+    category: "用神体系",
+    summary:
+      "世爻主自身、主事、当前立场，应爻主对方、外界、所应之处；世应关系可辅助判断人与事的互动。",
+    aiInstructions: [
+      "自占时先看世爻旺衰与受制情况，再看世应生克冲合。",
+      "交易、婚姻、合作、官讼等对待关系，要观察世应谁生谁、谁克谁、是否冲合。",
+    ],
+    caveats: ["代占时不可机械以世爻为用，应按所占对象另取用神。"],
+  },
+  {
+    id: "chapter-007-change",
+    chapter: "007",
+    title: "动变章",
+    category: "动变",
+    summary:
+      "动爻是卦中变化之机，会作用其他爻；本爻发动后化出变爻，变爻又回头作用本爻。",
+    aiInstructions: [
+      "动爻优先级高于普通静爻，应分析其对用神、世爻、应爻的生克冲合。",
+      "动爻化出之爻要看回头生、回头克、回头冲、回头合，以及化进退、化墓绝。",
+    ],
+    caveats: ["动不等于吉，静不等于凶；关键看动后对用神有益还是有害。"],
+  },
+  {
+    id: "chapter-008-use-spirit",
+    chapter: "008",
+    title: "用神章",
+    category: "用神体系",
+    summary:
+      "用神是所占之事的核心爻，断卦须围绕用神旺衰、受生受克、空破墓绝、动变趋势展开。",
+    aiInstructions: [
+      "AI 分析前必须明确用神；若用户未指定占事，应先给出可能用神并说明取法。",
+      "判断吉凶以用神是否得力为核心，其他规则均为服务用神的辅助证据。",
+    ],
+    caveats: ["未定用神时只能做盘面提示，不宜给确定结论。"],
+  },
+  {
+    id: "chapter-009-yuan-ji-chou",
+    chapter: "009",
+    title: "用神、元神、忌神、仇神章",
+    category: "用神体系",
+    summary:
+      "生用神者为元神，克用神者为忌神，生忌神者为仇神。吉凶要看元神是否有力、忌神是否有力。",
+    aiInstructions: [
+      "用神受克时，检查元神能否通关救助。",
+      "忌神发动且旺相，或得仇神相生，通常对用神压力更重。",
+    ],
+    caveats: ["元神休囚空破或被克时，虽名为元神也未必能生用。"],
+  },
+  {
+    id: "chapter-010-yuan-ji-strength",
+    chapter: "010",
+    title: "元神、忌神、衰旺章",
+    category: "生克旺衰",
+    summary:
+      "元神、忌神的力量由月日、动变、生扶、空破、进退、墓绝共同决定；有力才真正发挥生克。",
+    aiInstructions: [
+      "元神旺相、临日月、动化回头生或化进神，才是有力之助。",
+      "忌神休囚、空破、入墓、化退、化绝或被元神制约，则凶力减轻。",
+    ],
+    caveats: ["不要只看名义上的生克，要判断生克方自身是否有气。"],
+  },
+  {
+    id: "chapter-011-generating",
+    chapter: "011",
+    title: "五行相生章",
+    category: "生克旺衰",
+    summary:
+      "木生火、火生土、土生金、金生水、水生木。相生可为扶助、来源、转化、传递。",
+    aiInstructions: [
+      "生用神者为助力，生忌神者反为助凶。",
+      "分析链式相生时，要看中间爻是否空破休囚，能否真正传生。",
+    ],
+    caveats: ["相生也可能生起忌神，不可一概为吉。"],
+  },
+  {
+    id: "chapter-012-controlling",
+    chapter: "012",
+    title: "五行相克章",
+    category: "生克旺衰",
+    summary:
+      "木克土、土克水、水克火、火克金、金克木。相克可为压力、阻碍、约束、病伤。",
+    aiInstructions: [
+      "克用神者为损，克忌神者可为制凶。",
+      "旺者能克，衰者克力不足；被合、被冲、空破入墓也会改变克力。",
+    ],
+    caveats: ["克不是固定坏事，取决于被克者是否为喜用。"],
+  },
+  {
+    id: "chapter-013-hurt-with-rescue",
+    chapter: "013",
+    title: "克处逢生章",
+    category: "生克旺衰",
+    summary: "用神被克并非必凶，若另有日月动爻生扶，或克神受制，则为克处逢生。",
+    aiInstructions: [
+      "遇到用神被克，要继续查救应：日月生扶、元神发动、忌神被冲合克制。",
+      "若救神有力，可解释为有险有解、受阻后成。",
+    ],
+    caveats: ["救神无力时不可强作有救。"],
+  },
+  {
+    id: "chapter-014-moving-static",
+    chapter: "014",
+    title: "动静生克章",
+    category: "动变",
+    summary:
+      "动爻能主动生克冲合，静爻多为被动承受；静爻得日月冲起或值日月时，力量会改变。",
+    aiInstructions: [
+      "优先分析动爻对用神和世应的作用。",
+      "静爻若逢日冲且旺相，可作暗动；休囚被冲则多为破散。",
+    ],
+    caveats: ["动爻也要看旺衰空破，不是所有动爻都有实效。"],
+  },
+  {
+    id: "chapter-015-change-skch",
+    chapter: "015",
+    title: "动变生克冲合章",
+    category: "动变",
+    summary: "动爻与变爻之间的回头生克冲合，是判断事情后续走势的重要依据。",
+    aiInstructions: [
+      "回头生多主发动后得助，回头克多主发动后受制。",
+      "动而化合、化冲要结合占事解释为牵绊、冲散、触发或解开。",
+    ],
+    caveats: ["动变关系要放回用神喜忌中看。"],
+  },
+  {
+    id: "chapter-016-season-strength",
+    chapter: "016",
+    title: "四时旺相章",
+    category: "生克旺衰",
+    summary:
+      "五行随四时有旺相休囚死，月令决定大环境气势，是判断爻力的第一层依据。",
+    aiInstructions: [
+      "先看用神是否得月令，再看日辰和动爻能否补救。",
+      "得令者受克未必立败，失令者得生也要看生扶是否足够。",
+    ],
+    caveats: [
+      "当前系统用月建五行作简化旺相判断，AI 可在解释中说明还需细分四时。",
+    ],
+  },
+  {
+    id: "chapter-017-month",
+    chapter: "017",
+    title: "月将章",
+    category: "生克旺衰",
+    summary: "月建为一月之令，能生克冲合卦爻。爻临月建有力，被月建冲为月破。",
+    aiInstructions: [
+      "月建生扶用神多为根气，月建克冲用神多为大环境不利。",
+      "忌神临月建或入卦发动，凶力会增强。",
+    ],
+    caveats: ["月破不必永远无用，逢合、填实、得强助时仍可能应事。"],
+  },
+  {
+    id: "chapter-018-day",
+    chapter: "018",
+    title: "日辰章",
+    category: "生克旺衰",
+    summary: "日辰为当日主宰，能生克冲合卦爻，也能冲起旺相静爻成暗动。",
+    aiInstructions: [
+      "日辰对近期应事尤其敏感，要看日生、日克、日冲、日合。",
+      "静爻旺相逢日冲可作暗动，休囚逢日冲多作冲散。",
+    ],
+    caveats: ["日辰力量强，但也要和月令、动爻共同判断。"],
+  },
+  {
+    id: "chapter-019-six-spirits",
+    chapter: "019",
+    title: "六神章",
+    category: "取象参考",
+    summary:
+      "青龙、朱雀、勾陈、螣蛇、白虎、玄武用于辅助取象，如喜庆、文书、阻滞、惊疑、伤灾、隐暗等。",
+    aiInstructions: [
+      "六神主要用于解释事件性质、人物状态和细节，不独立决定吉凶。",
+      "六神临用神、世爻、动爻时取象更明显。",
+    ],
+    caveats: ["六神是象，不是力；必须附和用神旺衰。"],
+  },
+  {
+    id: "chapter-020-liuhe",
+    chapter: "020",
+    title: "六合章",
+    category: "冲合刑害",
+    summary:
+      "六合主合聚、牵连、迟滞、和合。合中有吉有凶，要看合住的是用神、忌神还是应期触发点。",
+    aiInstructions: [
+      "用神得合可为成合、合作、婚合，也可能为绊住不动。",
+      "忌神被合有时为凶力被绊，用神被合有时为事被拖延。",
+    ],
+    caveats: ["合不一定吉，要看合后的生克方向。"],
+  },
+  {
+    id: "chapter-021-sanhe",
+    chapter: "021",
+    title: "三合章",
+    category: "冲合刑害",
+    summary:
+      "亥卯未合木，寅午戌合火，巳酉丑合金，申子辰合水。三合成局主多方聚合、势成一局。",
+    aiInstructions: [
+      "三合局成后以局之五行分析其生克用神。",
+      "明动、暗动、变爻、日月参与成局时更有力。",
+    ],
+    caveats: ["旬空被克、日破无力者不宜强行入局。"],
+  },
+  {
+    id: "chapter-022-liuchong",
+    chapter: "022",
+    title: "六冲章",
+    category: "冲合刑害",
+    summary: "六冲主冲动、冲散、分离、急变，也可冲开闭塞、冲实旬空、冲开墓库。",
+    aiInstructions: [
+      "近病、忧患遇冲有时为散；久病、婚合、合作遇冲多主破散。",
+      "冲用神、冲忌神、冲墓、冲空的意义不同，需分别解释。",
+    ],
+    caveats: ["冲不是固定凶象，可能是解除束缚的触发。"],
+  },
+  {
+    id: "chapter-023-punishment",
+    chapter: "023",
+    title: "三刑章",
+    category: "冲合刑害",
+    summary:
+      "寅巳申、子卯、丑戌未及辰午酉亥自刑为三刑体系。原书认为独犯三刑验少，多须附和用神休囚受克才见凶。",
+    aiInstructions: [
+      "三刑出现时标记为风险象，重点检查用神是否同时休囚、被克、空破。",
+      "若用神旺相有救，不要因三刑单独下重凶结论。",
+    ],
+    caveats: ["三刑必须作为辅助证据，不能独操吉凶。"],
+  },
+  {
+    id: "chapter-024-harm",
+    chapter: "024",
+    title: "六害章",
+    category: "冲合刑害",
+    summary: "原书认为六害全无应验，删而不录。",
+    aiInstructions: ["AI 分析中不应把六害作为核心判断依据。"],
+    caveats: ["若其他流派使用六害，应明确它不是本规则库的主规则。"],
+  },
+  {
+    id: "chapter-025-dark-moving",
+    chapter: "025",
+    title: "暗动章",
+    category: "动变",
+    summary:
+      "旺相静爻被日辰冲起为暗动，能如动爻一样参与生克冲合；休囚被日冲多作冲散，不作暗动。",
+    aiInstructions: [
+      "识别暗动后，应把该爻纳入动爻作用和三合成局。",
+      "暗动常表示表面未动而内里已被触发。",
+    ],
+    caveats: ["是否暗动必须看旺相，不可见日冲即作暗动。"],
+  },
+  {
+    id: "chapter-026-moving-scattered",
+    chapter: "026",
+    title: "动散章",
+    category: "动变",
+    summary:
+      "动爻受日冲、月破、空破等影响时，可能动而无力或散而不成，但原书也强调旺动不易散。",
+    aiInstructions: [
+      "动爻被冲破时，不要立刻判无用，要看是否临日月、得生扶、化进退。",
+      "动散可解释为计划被冲开、力量不聚、行动反复。",
+    ],
+    caveats: ["动散判断争议较多，必须结合旺衰。"],
+  },
+  {
+    id: "chapter-027-gua-change",
+    chapter: "027",
+    title: "卦变生克墓绝章",
+    category: "动变",
+    summary:
+      "卦变后要看变卦与本卦、变爻与本爻的生克墓绝关系，不可只看本卦静态结构。",
+    aiInstructions: [
+      "动爻化长生、化旺、化比助多为化吉；化克、化墓、化绝、化空、化退多为化凶。",
+      "化吉化凶仍以用神喜忌为准。",
+    ],
+    caveats: ["化墓有收蓄与困滞两面，旺衰决定倾向。"],
+  },
+  {
+    id: "chapter-028-fanfu",
+    chapter: "028",
+    title: "反伏章",
+    category: "动变",
+    summary: "反吟、伏吟多主反复、迟滞、去而复来、事有回环。",
+    aiInstructions: [
+      "见反伏时，应提示事情过程反复、难一次定局。",
+      "仍需以用神旺衰和动变生克决定最终吉凶。",
+    ],
+    caveats: ["当前盘面若未提供反伏结构，AI 只能作知识提示。"],
+  },
+  {
+    id: "chapter-029-void",
+    chapter: "029",
+    title: "旬空章",
+    category: "空破墓绝",
+    summary:
+      "爻落旬空主虚、暂缺、未实、待填；近病逢空有时反主无妨，出空、冲空、填实为重要应期。",
+    aiInstructions: [
+      "用神空亡时说明当前不实或未到位，再看是否被冲实、出空、得生扶。",
+      "忌神空亡可减轻压力，但出空填实时可能重新发力。",
+    ],
+    caveats: ["空亡不是绝对无用，动空、旺空、冲空、出空要分别判断。"],
+  },
+  {
+    id: "chapter-030-life-stage",
+    chapter: "030",
+    title: "生旺墓绝章",
+    category: "空破墓绝",
+    summary:
+      "五行有长生、帝旺、墓、绝。木长生亥旺卯墓未绝申；火长生寅旺午墓戌绝亥；金长生巳旺酉墓丑绝寅；水土长生申旺子墓辰绝巳。",
+    aiInstructions: [
+      "用神临长生、帝旺，多主有根有力；临墓、绝，多主收敛、困住、断绝。",
+      "旺爻入墓未必凶，休囚无救又入墓绝才更危险。",
+    ],
+    caveats: ["土按原书采用长生在申、旺在子、墓在辰、绝在巳。"],
+  },
+  {
+    id: "chapter-031-topic-notes",
+    chapter: "031",
+    title: "各门类题头总注章",
+    category: "用神体系",
+    summary: "不同占事门类取用不同，主事爻、世爻、用神的优先级随问题改变。",
+    aiInstructions: [
+      "AI 必须先识别占事类型，再决定财、官、父、兄、子孙或世应何者为核心。",
+      "同一盘换问题，结论可能完全不同。",
+    ],
+    caveats: ["不要把通用盘面强行套到所有问题。"],
+  },
+  {
+    id: "chapter-032-timing",
+    chapter: "032",
+    title: "各门类应期总注章",
+    category: "应期",
+    summary:
+      "应期常取冲、合、值、填实、出空、冲墓、动变对应之年月日，但必须先确定吉凶和用神。",
+    aiInstructions: [
+      "先断成败，再断应期；成败未明时不要给过度确定时间。",
+      "常见应期点包括用神值日月、冲合用神、出空填实、冲开墓库、动爻或变爻逢值逢合。",
+    ],
+    caveats: ["应期最忌机械套公式，需多点互证。"],
+  },
+  {
+    id: "chapter-033-hun",
+    chapter: "033",
+    title: "归魂游魂章",
+    category: "取象参考",
+    summary:
+      "归魂多有回归、复返、内收之象；游魂多有漂泊、变动、外出、心神不定之象。",
+    aiInstructions: [
+      "行人、出行、迁移、失物、关系反复等问题可参考归魂游魂取象。",
+      "归魂游魂应作为过程象，不替代用神判断。",
+    ],
+    caveats: ["归魂游魂不是独立吉凶。"],
+  },
+  {
+    id: "chapter-034-month-break",
+    chapter: "034",
+    title: "月破章",
+    category: "空破墓绝",
+    summary:
+      "爻被月建冲为月破，主当月破败、无根、难成；但逢合、填实、得强生扶时仍可应事。",
+    aiInstructions: [
+      "用神月破要提示目前环境不利或暂时破损。",
+      "月破爻若发动、得日生、化进或待实破年月，仍可能成为应期点。",
+    ],
+    caveats: ["不要把月破简单等同永久无用。"],
+  },
+  {
+    id: "chapter-035-hidden-spirit",
+    chapter: "035",
+    title: "飞伏神章",
+    category: "用神体系",
+    summary:
+      "用神不现时可寻伏神，伏神受飞神覆盖，要看飞神生克伏神以及伏神能否透出得用。",
+    aiInstructions: [
+      "先看本卦、变卦是否已有用神；无用神时再考虑伏神。",
+      "伏神得日月生扶、飞神生伏或飞神被制时，伏神较易发挥。",
+    ],
+    caveats: ["有可用的本卦或变卦用神时，不宜舍近求伏。"],
+  },
+  {
+    id: "chapter-036-progress-retreat",
+    chapter: "036",
+    title: "进神退神章",
+    category: "动变",
+    summary:
+      "进神为动而前进，退神为动而渐退。亥化子、寅化卯、巳化午、申化酉、丑化辰、辰化未、未化戌、戌化丑为进；反向为退。",
+    aiInstructions: [
+      "喜用化进多主发展、增长、久远；忌神化进则凶力增长。",
+      "喜用化退多主减力退缩；忌神化退则阻力渐退。",
+    ],
+    caveats: ["进退仍须看旺衰、空破和占事远近，不可见进皆吉、见退皆凶。"],
+  },
+  {
+    id: "chapter-037-ghost-tomb",
+    chapter: "037",
+    title: "随鬼入墓章",
+    category: "空破墓绝",
+    summary:
+      "世爻或用神随官鬼入日墓、动墓、化墓，原书认为必须结合旺衰；旺而有扶未必凶，休囚被克又入墓才危险。",
+    aiInstructions: [
+      "疾病、官讼、牢狱、出行等问题见入墓，要区分困滞、收藏、闭锁、蓄势。",
+      "墓被冲开时可能为解脱，也可能为凶事发动，取决于墓中蓄的是生气还是凶气。",
+    ],
+    caveats: ["不可一见入墓就断死绝。"],
+  },
+  {
+    id: "chapter-038-solitary",
+    chapter: "038",
+    title: "独发章",
+    category: "应期",
+    summary:
+      "五爻静一爻动为独发，五爻动一爻静为独静。独发独静可辅助应期，但吉凶仍由用神决定。",
+    aiInstructions: [
+      "遇独发独静时，将该爻及其变爻作为重点观察点。",
+      "不要舍用神只凭独发独静断成败，可用于辅助验证应期。",
+    ],
+    caveats: ["原书多次强调独发独静不可执一。"],
+  },
+  {
+    id: "chapter-039-multiple-use-spirit",
+    chapter: "039",
+    title: "两现章",
+    category: "用神体系",
+    summary:
+      "用神两现或多现时，古法多取旺相、动爻、不空不破；原书也强调有时应验在空破之爻，须灵活取舍。",
+    aiInstructions: [
+      "多个用神并见时，比较旺衰、动静、空破、与世应关系、是否临日月。",
+      "空破之用神不可直接舍弃，可能应在出空、填实、实破之时。",
+    ],
+    caveats: ["两现取用需要结合占事和卦例互证，AI 应展示取舍理由。"],
+  },
+  {
+    id: "chapter-040-stars",
+    chapter: "040",
+    title: "星煞章",
+    category: "取象参考",
+    summary:
+      "原书只取贵人、禄神、驿马、天喜四种较验星煞，且不能独操祸福，必须附和用神旺相才为吉兆。",
+    aiInstructions: [
+      "贵人主助力，禄神主名禄资源，驿马主动迁奔走，天喜主喜庆婚庆。",
+      "星煞临用神、世爻、动爻且该爻旺相时，象意更可信。",
+    ],
+    caveats: ["星煞只能锦上添花，不能推翻生克制化。"],
+  },
+] as const satisfies readonly RuleKnowledgeEntry[];
+
+export const aiRulePromptText = aiRuleKnowledge
+  .map((rule) => {
+    const instructions = rule.aiInstructions
+      .map((item) => `- ${item}`)
+      .join("\n");
+    const caveats = rule.caveats.map((item) => `- ${item}`).join("\n");
+    return `【${rule.chapter} ${rule.title}】\n分类：${rule.category}\n核心：${rule.summary}\nAI使用：\n${instructions}\n注意：\n${caveats}`;
+  })
+  .join("\n\n");

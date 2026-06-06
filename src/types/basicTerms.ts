@@ -1,3 +1,5 @@
+import type { GuaName } from "../models/Gua";
+
 export const YAO_NAMES = ["初爻", "二爻", "三爻", "四爻", "五爻", "上爻"];
 export const STEM_NAMES = [
   "甲",
@@ -104,7 +106,7 @@ export type StrengthLabel = (typeof STRENGTH_LABELS)[number];
 export const SKCH_EFFECTS = ["无", "生", "克", "冲", "合"] as const;
 export type SKCHEffect = (typeof SKCH_EFFECTS)[number];
 
-export const LIU_CHONG_GUA_NAMES = new Set<string>([
+export const LIU_CHONG_GUA_NAMES = new Set<GuaName>([
   "乾为天",
   "坤为地",
   "震为雷",
@@ -113,9 +115,11 @@ export const LIU_CHONG_GUA_NAMES = new Set<string>([
   "离为火",
   "坎为水",
   "兑为泽",
+  "天雷无妄",
+  "雷天大壮",
 ]);
 
-export const LIU_HE_GUA_NAMES = new Set<string>([
+export const LIU_HE_GUA_NAMES = new Set<GuaName>([
   "天地否",
   "地天泰",
   "地雷复",
@@ -126,7 +130,7 @@ export const LIU_HE_GUA_NAMES = new Set<string>([
   "泽水困",
 ]);
 
-export const YOU_HUN_GUA_NAMES = new Set<string>([
+export const YOU_HUN_GUA_NAMES = new Set<GuaName>([
   "火地晋",
   "水天需",
   "泽风大过",
@@ -137,7 +141,7 @@ export const YOU_HUN_GUA_NAMES = new Set<string>([
   "雷山小过",
 ]);
 
-export const GUI_HUN_GUA_NAMES = new Set<string>([
+export const GUI_HUN_GUA_NAMES = new Set<GuaName>([
   "火天大有",
   "水地比",
   "泽雷随",
