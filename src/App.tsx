@@ -14,6 +14,7 @@ import { ArchivePage } from "./pages/ArchivePage";
 import { DivinePage } from "./pages/DivinePage";
 import { HomePage } from "./pages/HomePage";
 import { TablesPage } from "./pages/ReferencePage";
+import type { CastInfo, CastSubmitPayload } from "./types/cast";
 import type { PageKey } from "./types/navigation";
 
 function App() {
@@ -41,21 +42,21 @@ function App() {
     setCastVisible(false);
   }
 
-  function castRandom() {
-    const next = LiuYaoChart.random("随机起卦");
+  function castRandom(info: CastInfo) {
+    const next = LiuYaoChart.random(info.question, info.castAt);
     setChart(next);
     setUseYaoPosition(null);
     setActiveKey("divine");
     setCastVisible(false);
-    Toast.show({ content: "已完成一次随机起卦" });
+    Toast.show({ content: "已完成一次自动起卦" });
   }
 
-  function castManual(coinTotals: number[]) {
-    const yaos = coinTotals.map(
+  function castManual(payload: CastSubmitPayload) {
+    const yaos = payload.coinTotals.map(
       (total, position) =>
         new Yao(position, total % 2 === 1, total === 6 || total === 9),
     );
-    const next = new LiuYaoChart(yaos, "手动起卦");
+    const next = new LiuYaoChart(yaos, payload.question, payload.castAt);
     setChart(next);
     setUseYaoPosition(null);
     setActiveKey("divine");

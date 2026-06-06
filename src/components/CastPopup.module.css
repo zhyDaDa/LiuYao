@@ -36,6 +36,70 @@
   line-height: 1.6;
 }
 
+.fieldList {
+  display: grid;
+  gap: 10px;
+}
+
+.fieldRow {
+  display: grid;
+  gap: 8px;
+}
+
+.fieldRow span,
+.timeSwitchRow span,
+.timeButton span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.fieldRow :global(.adm-input) {
+  min-height: 38px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.timeSwitchRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 34px;
+}
+
+.timeButton {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 42px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  text-align: left;
+  background: var(--surface);
+}
+
+.timeButton:disabled {
+  color: var(--muted);
+  background: #eef3f1;
+}
+
+.timeButton strong {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .manualList {
   display: grid;
   gap: 10px;

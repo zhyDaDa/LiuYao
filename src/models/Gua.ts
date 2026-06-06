@@ -212,7 +212,7 @@ export class LiuYaoChart {
     this.title = `${question} · ${createdAt.toLocaleDateString("zh-CN")}`;
   }
 
-  static random(question = "随机起卦"): LiuYaoChart {
+  static random(question = "随机起卦", createdAt = new Date()): LiuYaoChart {
     const yaos = Array.from({ length: 6 }, (_, position) => {
       const coinTotal = 6 + Math.floor(Math.random() * 4);
       return new Yao(
@@ -221,7 +221,7 @@ export class LiuYaoChart {
         coinTotal === 6 || coinTotal === 9,
       );
     });
-    return new LiuYaoChart(yaos, question);
+    return new LiuYaoChart(yaos, question, createdAt);
   }
 
   static sample(): LiuYaoChart {
