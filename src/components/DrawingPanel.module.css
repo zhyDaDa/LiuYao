@@ -1,15 +1,32 @@
+:global(body.drawing-panel-locked),
+:global(body.drawing-panel-locked *) {
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  -webkit-touch-callout: none !important;
+}
+
+.root {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
 .drawingLayer {
   position: fixed;
   inset: 0;
   z-index: 40;
   background: rgba(255, 255, 255, 0.2);
   pointer-events: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .canvas {
   display: block;
   width: 100%;
   height: 100%;
+  opacity: 0.72;
   cursor: crosshair;
   pointer-events: auto;
   touch-action: none;
@@ -25,6 +42,9 @@
   align-items: center;
   gap: 8px;
   max-width: calc(100vw - 28px);
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .controlsExpanded {
@@ -69,6 +89,10 @@
   stroke-linejoin: round;
   align-self: center;
   justify-self: center;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  pointer-events: none;
 }
 
 .toolbar {
@@ -85,32 +109,62 @@
   backdrop-filter: blur(14px);
 }
 
-.colors {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.colorButton {
-  width: 24px;
-  height: 24px;
-  min-width: 24px;
-  padding: 0;
-  border: 2px solid transparent;
-  border-radius: 999px;
-  background: var(--brush-color);
-  cursor: pointer;
-}
-
-.colorButtonActive {
-  border-color: var(--ink);
-  box-shadow: 0 0 0 2px var(--surface);
+.toolbar :global(.ant-color-picker-trigger) {
+  width: 30px;
+  min-width: 30px;
+  height: 30px;
+  border-radius: 8px;
 }
 
 .actions {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+}
+
+.previewMask {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: grid;
+  place-items: center;
+  padding: 14px;
+  background: rgba(21, 19, 17, 0.42);
+}
+
+.previewPanel {
+  display: grid;
+  gap: 10px;
+  width: min(100%, 720px);
+  max-height: calc(100svh - 28px);
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.previewImage {
+  display: block;
+  width: 100%;
+  max-height: calc(100svh - 96px);
+  object-fit: contain;
+  border-radius: 6px;
+  background: var(--bg);
+  -webkit-user-select: auto !important;
+  user-select: auto !important;
+  -webkit-touch-callout: default !important;
+}
+
+:global(body.drawing-panel-locked) .previewImage {
+  -webkit-user-select: auto !important;
+  user-select: auto !important;
+  -webkit-touch-callout: default !important;
+}
+
+.previewActions {
+  display: flex;
+  justify-content: flex-end;
 }
 
 @media (max-width: 520px) {

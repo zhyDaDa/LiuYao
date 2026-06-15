@@ -1,19 +1,27 @@
 import { createPortal } from "react-dom";
+import { ColorPicker } from "antd";
+import { Toast } from "antd-mobile";
+import type { ColorPickerProps } from "antd";
 import {
   useEffect,
   useRef,
   useState,
-  type CSSProperties,
   type PointerEvent as ReactPointerEvent,
   type RefObject,
 } from "react";
 import { FullScreen, OffScreen } from "../icons/Icons";
 import { TapButton } from "./TapButton";
-import { captureElementScreenshot } from "../utils/captureElementScreenshot";
 import styles from "./DrawingPanel.module.css";
 
 const BRUSH_SIZE = 4;
 const BRUSH_COLORS = ["#b94335", "#151311", "#317a56", "#a36a1d"];
+const BRUSH_COLOR_PRESETS: Required<ColorPickerProps>["presets"] = [
+  {
+    label: "常用",
+    colors: BRUSH_COLORS,
+    key: "brush",
+  },
+];
 
 interface DrawingPanelProps {
   expanded: boolean;
@@ -29,7 +37,32 @@ export function DrawingPanel({
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const lastPointRef = useRef<{ x: number; y: number } | null>(null);
   const [brushColor, setBrushColor] = useState(BRUSH_COLORS[0]);
-  const [saving, setSaving] = useState(false);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!expanded) {
+      document.body.classList.remove("drawing-panel-locked");
+      return;
+    }
+
+    function preventSelection(event: Event) {
+      event.preventDefault();
+    }
+
+    function clearSelection() {
+      window.getSelection()?.removeAllRanges();
+    }
+
+    document.body.classList.add("drawing-panel-locked");
+    document.addEventListener("selectstart", preventSelection);
+    document.addEventListener("selectionchange", clearSelection);
+
+    return () => {
+      document.body.classList.remove("drawing-panel-locked");
+      document.removeEventListener("selectstart", preventSelection);
+      document.removeEventListener("selectionchange", clearSelection);
+    };
+  }, [expanded]);
 
   useEffect(() => {
     if (!expanded) return;
@@ -69,6 +102,7 @@ export function DrawingPanel({
     }
 
     resizeCanvas();
+    handleClear();
     window.addEventListener("resize", resizeCanvas);
     window.addEventListener("orientationchange", resizeCanvas);
 
@@ -113,21 +147,6 @@ export function DrawingPanel({
     context.restore();
   }
 
-  async function handleSave() {
-    if (!captureTargetRef.current) return;
-
-    try {
-      setSaving(true);
-      await captureElementScreenshot({
-        target: captureTargetRef.current,
-        drawingCanvas: canvasRef.current,
-        fileName: `排盘标记-${formatFileTime(new Date())}.png`,
-      });
-    } finally {
-      setSaving(false);
-    }
-  }
-
   function drawPoint(point: { x: number; y: number }) {
     const context = canvasRef.current?.getContext("2d");
     if (!context) return;
@@ -154,9 +173,12 @@ export function DrawingPanel({
   }
 
   return createPortal(
-    <>
+    <div className={styles.root}>
       {expanded ? (
-        <div className={styles.drawingLayer}>
+        <div
+          className={styles.drawingLayer}
+          onContextMenu={(event) => event.preventDefault()}
+        >
           <canvas
             ref={canvasRef}
             className={styles.canvas}
@@ -173,6 +195,7 @@ export function DrawingPanel({
           styles.controls,
           expanded ? styles.controlsExpanded : "",
         ].join(" ")}
+        onContextMenu={(event) => event.preventDefault()}
       >
         <TapButton
           className={styles.toggleButton}
@@ -185,39 +208,42 @@ export function DrawingPanel({
 
         {expanded ? (
           <div className={styles.toolbar}>
-            <div className={styles.colors} aria-label="画笔颜色">
-              {BRUSH_COLORS.map((color) => (
-                <button
-                  key={color}
-                  type="button"
-                  className={[
-                    styles.colorButton,
-                    color === brushColor ? styles.colorButtonActive : "",
-                  ].join(" ")}
-                  style={{ "--brush-color": color } as CSSProperties}
-                  aria-label={`选择画笔颜色 ${color}`}
-                  onClick={() => setBrushColor(color)}
-                />
-              ))}
-            </div>
+            <ColorPicker
+              value={brushColor}
+              presets={BRUSH_COLOR_PRESETS}
+              onChange={(color) => setBrushColor(color.toHexString())}
+            />
 
             <div className={styles.actions}>
               <TapButton size="small" fill="outline" onTap={handleClear}>
                 清除
               </TapButton>
-              <TapButton
-                size="small"
-                color="primary"
-                disabled={saving}
-                onTap={handleSave}
-              >
-                {saving ? "保存中" : "保存"}
-              </TapButton>
             </div>
           </div>
         ) : null}
       </div>
-    </>,
+
+      {previewImage ? (
+        <div className={styles.previewMask}>
+          <div className={styles.previewPanel}>
+            <img
+              className={styles.previewImage}
+              src={previewImage}
+              alt="排盘标记截图"
+            />
+            <div className={styles.previewActions}>
+              <TapButton
+                size="small"
+                fill="outline"
+                onTap={() => setPreviewImage(null)}
+              >
+                关闭
+              </TapButton>
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </div>,
     document.body,
   );
 }
@@ -229,18 +255,4 @@ function getCanvasPoint(event: ReactPointerEvent<HTMLCanvasElement>) {
     x: event.clientX - rect.left,
     y: event.clientY - rect.top,
   };
-}
-
-function formatFileTime(date: Date) {
-  const pad = (value: number) => String(value).padStart(2, "0");
-
-  return [
-    date.getFullYear(),
-    pad(date.getMonth() + 1),
-    pad(date.getDate()),
-    "-",
-    pad(date.getHours()),
-    pad(date.getMinutes()),
-    pad(date.getSeconds()),
-  ].join("");
 }
