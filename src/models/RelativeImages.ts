@@ -46,8 +46,8 @@ export function getRelativeChangeReference(
   if (specificReference) return specificReference;
 
   if (fromRelative === toRelative) {
-    return `${RELATIVE_IMAGE_MAP[fromRelative]} 同类六亲互化，主此类信息延续、反复或加重，具体吉凶仍需结合旺衰、进退、空破和生克判断。`;
+    return `同类六亲互化，主此类信息延续、反复或加重，具体吉凶仍需结合旺衰、进退、空破和生克判断。`;
   }
 
-  return `动爻为开始，变爻为结束；可参考由“${RELATIVE_IMAGE_MAP[fromRelative]}”转向“${RELATIVE_IMAGE_MAP[toRelative]}”。此条只作取象提示，不直接决定生克冲合。`;
+  return `无特别意象`;
 }

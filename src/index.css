@@ -729,6 +729,10 @@ h2 {
   stroke: #317a56;
 }
 
+.relation-line.sanhe {
+  stroke: #a0a0a066;
+}
+
 .branch-cell {
   position: relative;
   z-index: 2;
