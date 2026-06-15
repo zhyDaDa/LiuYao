@@ -54,7 +54,7 @@ export function Coin({
       new Quaternion(rotation.x, rotation.y, rotation.z, rotation.w),
     );
     const normalDot = normal.dot(WORLD_UP);
-    const isLowSpeed = linearSpeed < 0.12 && angularSpeed < 0.36;
+    const isLowSpeed = linearSpeed < 0.2 && angularSpeed < 1;
     const isSettledFace = Math.abs(normalDot) >= SETTLE_NORMAL_DOT;
     const isAmbiguousFace = Math.abs(normalDot) < SETTLE_NORMAL_DOT;
 

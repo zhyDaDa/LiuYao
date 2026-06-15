@@ -44,7 +44,10 @@ export function CoinTossCanvas({
           />
           <Physics gravity={[0, -9.81, 0]}>
             <RigidBody type="fixed">
-              <CuboidCollider args={[2.2, 0.08, 1.55]} position={[0, -0.08, 0]} />
+              <CuboidCollider
+                args={[2.2, 0.08, 1.55]}
+                position={[0, -0.08, 0]}
+              />
               <mesh receiveShadow position={[0, -0.09, 0]}>
                 <boxGeometry args={[4.4, 0.08, 3.1]} />
                 <meshStandardMaterial color="#e2d4b6" roughness={0.75} />
@@ -75,7 +78,11 @@ export function CoinTossCanvas({
             {throwing ? "投掷中" : ready ? "投掷三枚铜钱" : "准备铜钱"}
           </TapButton>
           {throwing && (
-            <TapButton fill="outline" onTap={toss} disabled={disabled || !ready}>
+            <TapButton
+              fill="outline"
+              onTap={toss}
+              disabled={disabled || !ready}
+            >
               重新投掷
             </TapButton>
           )}
