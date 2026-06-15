@@ -122,49 +122,50 @@
   gap: 6px;
 }
 
-.previewMask {
+.branchLookupPanel {
   position: fixed;
-  inset: 0;
-  z-index: 1100;
+  right: 12px;
+  bottom: calc(58px + env(safe-area-inset-bottom));
+  z-index: 1200;
   display: grid;
-  place-items: center;
-  padding: 14px;
-  background: rgba(21, 19, 17, 0.42);
-}
-
-.previewPanel {
-  display: grid;
-  gap: 10px;
-  width: min(100%, 720px);
-  max-height: calc(100svh - 28px);
+  gap: 8px;
+  width: min(92vw, 380px);
+  max-height: calc(100svh - 74px);
+  overflow-y: auto;
   padding: 10px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface);
   box-shadow: var(--shadow);
+  pointer-events: auto;
 }
 
-.previewImage {
-  display: block;
-  width: 100%;
-  max-height: calc(100svh - 96px);
-  object-fit: contain;
-  border-radius: 6px;
-  background: var(--bg);
-  -webkit-user-select: auto !important;
-  user-select: auto !important;
-  -webkit-touch-callout: default !important;
-}
-
-:global(body.drawing-panel-locked) .previewImage {
-  -webkit-user-select: auto !important;
-  user-select: auto !important;
-  -webkit-touch-callout: default !important;
-}
-
-.previewActions {
+.branchLookupHead {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
+  gap: 8px;
+}
+
+.branchLookupHead span {
+  margin-right: auto;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.branchLookupPanel :global(.branch-cycle-card) {
+  margin: 0;
+  padding: 10px;
+  box-shadow: none;
+}
+
+.branchLookupPanel :global(.branch-cycle-head) {
+  margin-bottom: 8px;
+}
+
+.branchLookupPanel :global(.branch-cycle-board) {
+  width: min(100%, 320px);
 }
 
 @media (max-width: 520px) {
@@ -178,5 +179,11 @@
     justify-content: space-between;
     gap: 6px;
     overflow-x: auto;
+  }
+
+  .branchLookupPanel {
+    left: 10px;
+    right: 10px;
+    width: auto;
   }
 }

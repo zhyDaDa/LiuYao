@@ -104,6 +104,19 @@ h2 {
   font-size: 24px;
 }
 
+.editable-chart-title {
+  margin: 6px 0 0 !important;
+  color: var(--ink);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.14;
+  letter-spacing: 0;
+}
+
+.editable-chart-title .ant-typography-edit {
+  color: var(--muted);
+}
+
 .eyebrow {
   display: inline-flex;
   color: var(--red);
@@ -928,6 +941,10 @@ h2 {
   }
 
   .compact-title h1 {
+    font-size: 30px;
+  }
+
+  .editable-chart-title {
     font-size: 30px;
   }
 

@@ -80,6 +80,37 @@ function App() {
     Toast.show({ content: "已保存到档案库" });
   }
 
+  function renameCurrent(nextQuestion: string) {
+    const question = nextQuestion.trim();
+
+    if (!chart) return;
+
+    if (!question) {
+      Toast.show({ content: "排盘名称不能为空" });
+      return;
+    }
+
+    const nextChart = new LiuYaoChart(
+      chart.yaos,
+      question,
+      chart.createdAt,
+      chart.id,
+      chart.remark,
+    );
+    const nextSnapshot = nextChart.toSnapshot(
+      useYaoPosition,
+      yaoPositionCategory,
+    );
+    const nextArchive = archive.map((item) =>
+      item.id === nextSnapshot.id ? nextSnapshot : item,
+    );
+
+    setChart(nextChart);
+    setArchive(nextArchive);
+    writeArchive(nextArchive);
+    Toast.show({ content: "排盘名称已更新" });
+  }
+
   function loadArchive(item: ChartSnapshot) {
     setChart(LiuYaoChart.fromSnapshot(item));
     setUseYaoPosition(item.useYaoPosition ?? null);
@@ -139,6 +170,7 @@ function App() {
             snapshot={snapshot}
             onCast={openCastPopup}
             onSave={saveCurrent}
+            onRename={renameCurrent}
             onInspect={setSelectedYao}
             onUseYao={setUseYaoPosition}
             yaoPositionCategory={yaoPositionCategory}

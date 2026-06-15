@@ -1,20 +1,20 @@
 import { createPortal } from "react-dom";
 import { ColorPicker } from "antd";
-import { Toast } from "antd-mobile";
 import type { ColorPickerProps } from "antd";
 import {
   useEffect,
   useRef,
   useState,
   type PointerEvent as ReactPointerEvent,
-  type RefObject,
 } from "react";
+import { BranchCycleTable } from "./BranchCycleTable";
 import { FullScreen, OffScreen } from "../icons/Icons";
 import { TapButton } from "./TapButton";
 import styles from "./DrawingPanel.module.css";
 
 const BRUSH_SIZE = 4;
 const BRUSH_COLORS = ["#b94335", "#151311", "#317a56", "#a36a1d"];
+const DRAWING_PANEL_STORAGE_KEY = "liuyao:drawing-panel-image";
 const BRUSH_COLOR_PRESETS: Required<ColorPickerProps>["presets"] = [
   {
     label: "常用",
@@ -26,18 +26,15 @@ const BRUSH_COLOR_PRESETS: Required<ColorPickerProps>["presets"] = [
 interface DrawingPanelProps {
   expanded: boolean;
   onToggle: () => void;
-  captureTargetRef: RefObject<HTMLDivElement | null>;
 }
 
-export function DrawingPanel({
-  expanded,
-  onToggle,
-  captureTargetRef,
-}: DrawingPanelProps) {
+export function DrawingPanel({ expanded, onToggle }: DrawingPanelProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const savedCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const hasDrawingRef = useRef(false);
   const lastPointRef = useRef<{ x: number; y: number } | null>(null);
   const [brushColor, setBrushColor] = useState(BRUSH_COLORS[0]);
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [branchLookupOpen, setBranchLookupOpen] = useState(false);
 
   useEffect(() => {
     if (!expanded) {
@@ -65,20 +62,19 @@ export function DrawingPanel({
   }, [expanded]);
 
   useEffect(() => {
-    if (!expanded) return;
+    if (!expanded) {
+      saveCanvasSnapshot();
+      setBranchLookupOpen(false);
+      return;
+    }
 
-    function resizeCanvas() {
+    function resizeCanvas(shouldBackupCurrent = true) {
       const canvas = canvasRef.current;
       if (!canvas) return;
 
-      const oldWidth = canvas.clientWidth;
-      const oldHeight = canvas.clientHeight;
-      const backupCanvas = document.createElement("canvas");
-      backupCanvas.width = canvas.width;
-      backupCanvas.height = canvas.height;
-
-      const backupContext = backupCanvas.getContext("2d");
-      backupContext?.drawImage(canvas, 0, 0);
+      if (shouldBackupCurrent) {
+        saveCanvasSnapshot();
+      }
 
       const ratio = window.devicePixelRatio || 1;
       const width = window.innerWidth;
@@ -96,19 +92,18 @@ export function DrawingPanel({
       context.lineCap = "round";
       context.lineJoin = "round";
 
-      if (backupCanvas.width > 0 && backupCanvas.height > 0) {
-        context.drawImage(backupCanvas, 0, 0, oldWidth, oldHeight);
-      }
+      restoreCanvasSnapshot();
     }
 
-    resizeCanvas();
-    handleClear();
-    window.addEventListener("resize", resizeCanvas);
-    window.addEventListener("orientationchange", resizeCanvas);
+    restoreCanvasSnapshotFromStorage(() => resizeCanvas(false));
+    const handleResize = () => resizeCanvas(true);
+    window.addEventListener("resize", handleResize);
+    window.addEventListener("orientationchange", handleResize);
 
     return () => {
-      window.removeEventListener("resize", resizeCanvas);
-      window.removeEventListener("orientationchange", resizeCanvas);
+      saveCanvasSnapshot();
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("orientationchange", handleResize);
     };
   }, [expanded]);
 
@@ -134,6 +129,7 @@ export function DrawingPanel({
     }
 
     lastPointRef.current = null;
+    saveCanvasSnapshot();
   }
 
   function handleClear() {
@@ -145,6 +141,18 @@ export function DrawingPanel({
     context.setTransform(1, 0, 0, 1, 0, 0);
     context.clearRect(0, 0, canvas.width, canvas.height);
     context.restore();
+    savedCanvasRef.current = null;
+    hasDrawingRef.current = false;
+    window.localStorage.removeItem(DRAWING_PANEL_STORAGE_KEY);
+  }
+
+  function toggleExpanded() {
+    if (expanded) {
+      saveCanvasSnapshot();
+      setBranchLookupOpen(false);
+    }
+
+    onToggle();
   }
 
   function drawPoint(point: { x: number; y: number }) {
@@ -155,6 +163,7 @@ export function DrawingPanel({
     context.beginPath();
     context.arc(point.x, point.y, BRUSH_SIZE / 2, 0, Math.PI * 2);
     context.fill();
+    hasDrawingRef.current = true;
   }
 
   function drawLine(
@@ -170,6 +179,84 @@ export function DrawingPanel({
     context.moveTo(start.x, start.y);
     context.lineTo(end.x, end.y);
     context.stroke();
+    hasDrawingRef.current = true;
+  }
+
+  function saveCanvasSnapshot() {
+    const canvas = canvasRef.current;
+    if (
+      !canvas ||
+      canvas.width <= 0 ||
+      canvas.height <= 0 ||
+      !hasDrawingRef.current
+    ) {
+      return;
+    }
+
+    const snapshot = savedCanvasRef.current ?? document.createElement("canvas");
+    snapshot.width = canvas.width;
+    snapshot.height = canvas.height;
+    snapshot.getContext("2d")?.drawImage(canvas, 0, 0);
+    savedCanvasRef.current = snapshot;
+    persistCanvasSnapshot(snapshot);
+  }
+
+  function restoreCanvasSnapshot() {
+    const canvas = canvasRef.current;
+    const snapshot = savedCanvasRef.current;
+    if (!canvas || !snapshot || snapshot.width <= 0 || snapshot.height <= 0) {
+      return;
+    }
+
+    const context = canvas.getContext("2d");
+    if (!context) return;
+
+    context.drawImage(
+      snapshot,
+      0,
+      0,
+      snapshot.width,
+      snapshot.height,
+      0,
+      0,
+      canvas.clientWidth,
+      canvas.clientHeight,
+    );
+  }
+
+  function restoreCanvasSnapshotFromStorage(onRestored: () => void) {
+    const storedImage = window.localStorage.getItem(DRAWING_PANEL_STORAGE_KEY);
+    if (!storedImage) {
+      onRestored();
+      return;
+    }
+
+    const image = new Image();
+    image.onload = () => {
+      const snapshot = document.createElement("canvas");
+      snapshot.width = image.naturalWidth;
+      snapshot.height = image.naturalHeight;
+      snapshot.getContext("2d")?.drawImage(image, 0, 0);
+      savedCanvasRef.current = snapshot;
+      hasDrawingRef.current = true;
+      onRestored();
+    };
+    image.onerror = () => {
+      window.localStorage.removeItem(DRAWING_PANEL_STORAGE_KEY);
+      onRestored();
+    };
+    image.src = storedImage;
+  }
+
+  function persistCanvasSnapshot(canvas: HTMLCanvasElement) {
+    try {
+      window.localStorage.setItem(
+        DRAWING_PANEL_STORAGE_KEY,
+        canvas.toDataURL("image/png"),
+      );
+    } catch {
+      // Ignore storage quota errors; the in-memory canvas still works in session.
+    }
   }
 
   return createPortal(
@@ -201,7 +288,7 @@ export function DrawingPanel({
           className={styles.toggleButton}
           shape="default"
           color="primary"
-          onTap={onToggle}
+          onTap={toggleExpanded}
         >
           {expanded ? OffScreen : FullScreen}
         </TapButton>
@@ -218,29 +305,31 @@ export function DrawingPanel({
               <TapButton size="small" fill="outline" onTap={handleClear}>
                 清除
               </TapButton>
+              <TapButton
+                size="small"
+                fill="outline"
+                onTap={() => setBranchLookupOpen((value) => !value)}
+              >
+                地支速查
+              </TapButton>
             </div>
           </div>
         ) : null}
       </div>
 
-      {previewImage ? (
-        <div className={styles.previewMask}>
-          <div className={styles.previewPanel}>
-            <img
-              className={styles.previewImage}
-              src={previewImage}
-              alt="排盘标记截图"
-            />
-            <div className={styles.previewActions}>
-              <TapButton
-                size="small"
-                fill="outline"
-                onTap={() => setPreviewImage(null)}
-              >
-                关闭
-              </TapButton>
-            </div>
+      {expanded && branchLookupOpen ? (
+        <div className={styles.branchLookupPanel}>
+          <div className={styles.branchLookupHead}>
+            <span>地支速查</span>
+            <TapButton
+              size="small"
+              fill="outline"
+              onTap={() => setBranchLookupOpen(false)}
+            >
+              关闭
+            </TapButton>
           </div>
+          <BranchCycleTable />
         </div>
       ) : null}
     </div>,

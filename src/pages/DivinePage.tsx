@@ -1,4 +1,5 @@
-import { useRef, useState } from "react";
+import { Typography } from "antd";
+import { useState } from "react";
 import { ChartView } from "../components/ChartView";
 import { DrawingPanel } from "../components/DrawingPanel";
 import { TapButton } from "../components/TapButton";
@@ -6,10 +7,13 @@ import type { ChartSnapshot, YaoSnapshot } from "../models/Gua";
 import type { YaoPositionCategory } from "../models/YaoPositionImages";
 import { YAO_POSITION_CATEGORY_OPTIONS } from "../models/YaoPositionImages";
 
+const { Paragraph } = Typography;
+
 export function DivinePage({
   snapshot,
   onCast,
   onSave,
+  onRename,
   onInspect,
   onUseYao,
   yaoPositionCategory,
@@ -18,19 +22,31 @@ export function DivinePage({
   snapshot: ChartSnapshot | null;
   onCast: () => void;
   onSave: () => void;
+  onRename: (name: string) => void;
   onInspect: (yao: YaoSnapshot) => void;
   onUseYao: (position: number | null) => void;
   yaoPositionCategory: YaoPositionCategory;
   onYaoPositionCategoryChange: (category: YaoPositionCategory) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
-  const chartStageRef = useRef<HTMLDivElement>(null);
 
   return (
     <section className="page divine-page">
       <div className="page-title compact-title">
         <span className="eyebrow">排盘</span>
-        <h1>{snapshot?.question ?? "等待起卦"}</h1>
+        <Paragraph
+          className="editable-chart-title"
+          editable={
+            snapshot
+              ? {
+                  tooltip: "修改排盘名称",
+                  onChange: onRename,
+                }
+              : false
+          }
+        >
+          {snapshot?.question ?? "等待起卦"}
+        </Paragraph>
       </div>
 
       <div className="action-strip">
@@ -66,12 +82,10 @@ export function DivinePage({
             onInspect={onInspect}
             onUseYao={onUseYao}
             expanded={expanded}
-            stageRef={chartStageRef}
           />
           <DrawingPanel
             expanded={expanded}
             onToggle={() => setExpanded(!expanded)}
-            captureTargetRef={chartStageRef}
           />
         </>
       ) : (
