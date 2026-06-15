@@ -1,0 +1,128 @@
+.drawingLayer {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(255, 255, 255, 0.2);
+  pointer-events: none;
+}
+
+.canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: crosshair;
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.controls {
+  position: fixed;
+  right: 14px;
+  bottom: calc(var(--nav-height) + 14px + env(safe-area-inset-bottom));
+  z-index: 1000;
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  gap: 8px;
+  max-width: calc(100vw - 28px);
+}
+
+.controlsExpanded {
+  right: 12px;
+  bottom: calc(12px + env(safe-area-inset-bottom));
+}
+
+.toggleButton {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1;
+  box-shadow: var(--shadow);
+}
+
+.toggleButton :global(.adm-button-content) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  line-height: 0;
+}
+
+.toggleButton :global(.tap-button-content) {
+  line-height: 0;
+}
+
+.toggleButton :global(.button-icon) {
+  display: block;
+  width: 18px;
+  height: 18px;
+  color: #fff;
+  stroke: currentColor;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  align-self: center;
+  justify-self: center;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: calc(100vw - 82px);
+  min-height: 36px;
+  padding: 5px 7px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(14px);
+}
+
+.colors {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.colorButton {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: var(--brush-color);
+  cursor: pointer;
+}
+
+.colorButtonActive {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 2px var(--surface);
+}
+
+.actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+@media (max-width: 520px) {
+  .controlsExpanded {
+    left: 10px;
+  }
+
+  .toolbar {
+    flex: 1;
+    min-width: 0;
+    justify-content: space-between;
+    gap: 6px;
+    overflow-x: auto;
+  }
+}

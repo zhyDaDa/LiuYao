@@ -43,10 +43,11 @@ export function HomePage({
         <div>
           <Title level={2}>版本信息</Title>
           <Paragraph>
-            当前版本 0.2.4-alpha，已包含:
+            当前版本 0.2.5-alpha，已包含:
             <ul>
               <li>自动/手动/模拟起卦</li>
               <li>基本排盘</li>
+              <li>排盘分析草稿</li>
               <li>十二长生</li>
               <li>存档管理</li>
               <li>速查表格</li>

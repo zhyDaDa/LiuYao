@@ -22,15 +22,17 @@ function App() {
   const [chart, setChart] = useState<LiuYaoChart | null>(null);
   const [archive, setArchive] = useState<ChartSnapshot[]>(readArchive);
   const [selectedYao, setSelectedYao] = useState<YaoSnapshot | null>(null);
-  const [archivePreview, setArchivePreview] = useState<ChartSnapshot | null>(null);
+  const [archivePreview, setArchivePreview] = useState<ChartSnapshot | null>(
+    null,
+  );
   const [archiveEdit, setArchiveEdit] = useState<ChartSnapshot | null>(null);
-  const [expanded, setExpanded] = useState(false);
   const [castVisible, setCastVisible] = useState(false);
   const [useYaoPosition, setUseYaoPosition] = useState<number | null>(null);
   const [yaoPositionCategory, setYaoPositionCategory] =
     useState<YaoPositionCategory>(DEFAULT_YAO_POSITION_CATEGORY);
   const snapshot = useMemo(
-    () => (chart ? chart.toSnapshot(useYaoPosition, yaoPositionCategory) : null),
+    () =>
+      chart ? chart.toSnapshot(useYaoPosition, yaoPositionCategory) : null,
     [chart, useYaoPosition, yaoPositionCategory],
   );
 
@@ -69,7 +71,10 @@ function App() {
       Toast.show({ content: "请先起卦再存档" });
       return;
     }
-    const nextArchive = [snapshot, ...archive.filter((item) => item.id !== snapshot.id)].slice(0, 30);
+    const nextArchive = [
+      snapshot,
+      ...archive.filter((item) => item.id !== snapshot.id),
+    ].slice(0, 30);
     setArchive(nextArchive);
     writeArchive(nextArchive);
     Toast.show({ content: "已保存到档案库" });
@@ -113,7 +118,9 @@ function App() {
     });
     if (!confirmed) return;
 
-    const nextArchive = archive.filter((archiveItem) => archiveItem.id !== item.id);
+    const nextArchive = archive.filter(
+      (archiveItem) => archiveItem.id !== item.id,
+    );
     setArchive(nextArchive);
     writeArchive(nextArchive);
     setArchivePreview((current) => (current?.id === item.id ? null : current));
@@ -122,9 +129,11 @@ function App() {
   }
 
   return (
-    <div className={expanded ? "app is-expanded" : "app"}>
+    <div className={"app"}>
       <main className="app-main">
-        {activeKey === "home" && <HomePage onCast={openCastPopup} archiveCount={archive.length} />}
+        {activeKey === "home" && (
+          <HomePage onCast={openCastPopup} archiveCount={archive.length} />
+        )}
         {activeKey === "divine" && (
           <DivinePage
             snapshot={snapshot}
@@ -134,8 +143,6 @@ function App() {
             onUseYao={setUseYaoPosition}
             yaoPositionCategory={yaoPositionCategory}
             onYaoPositionCategoryChange={setYaoPositionCategory}
-            expanded={expanded}
-            onToggleExpanded={() => setExpanded((value) => !value)}
           />
         )}
         {activeKey === "archive" && (
@@ -150,7 +157,7 @@ function App() {
         {activeKey === "tables" && <TablesPage />}
       </main>
 
-      {!expanded && <BottomNav activeKey={activeKey} onChange={setActiveKey} />}
+      <BottomNav activeKey={activeKey} onChange={setActiveKey} />
       <CastPopup
         visible={castVisible}
         onClose={closeCastPopup}
@@ -158,7 +165,11 @@ function App() {
         onManualCast={castManual}
       />
       <YaoDrawer yao={selectedYao} onClose={() => setSelectedYao(null)} />
-      <ArchiveModal item={archivePreview} onClose={() => setArchivePreview(null)} onLoad={loadArchive} />
+      <ArchiveModal
+        item={archivePreview}
+        onClose={() => setArchivePreview(null)}
+        onLoad={loadArchive}
+      />
       <ArchiveEditModal
         item={archiveEdit}
         onClose={() => setArchiveEdit(null)}

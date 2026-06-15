@@ -555,44 +555,6 @@ h2 {
   user-select: none;
 }
 
-.expanded-stage .chart-layout {
-  display: grid;
-  grid-template-columns: 168px minmax(0, 1fr);
-  gap: 10px;
-  width: min(1040px, 100%);
-  margin-inline: auto;
-}
-
-.expanded-stage .chart-side {
-  align-self: start;
-}
-
-.expanded-stage .calendar-band,
-.expanded-stage .gua-summary {
-  gap: 6px;
-}
-
-.expanded-stage .gua-summary {
-  grid-template-columns: 1fr;
-}
-
-.expanded-stage .calendar-band div {
-  padding: 6px 8px;
-}
-
-.expanded-stage .calendar-band strong,
-.expanded-stage .gua-summary strong {
-  font-size: 16px;
-}
-
-.expanded-stage .gua-summary div {
-  padding: 8px;
-}
-
-.expanded-stage .calendar-note {
-  margin-top: 0;
-}
-
 .rule-drawer {
   width: min(86vw, 390px);
   height: 100svh;
@@ -1024,7 +986,7 @@ h2 {
   }
 }
 
-@media (max-width: 759px) {
+/* @media (max-width: 759px) {
   .expanded-stage {
     top: 50%;
     right: auto;
@@ -1063,4 +1025,4 @@ h2 {
   .expanded-stage .gua-line-cell {
     gap: 0;
   }
-}
+} */

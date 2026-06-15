@@ -1,5 +1,6 @@
+import { useRef, useState } from "react";
 import { ChartView } from "../components/ChartView";
-import { FixedExpandButton } from "../components/FixedExpandButton";
+import { DrawingPanel } from "../components/DrawingPanel";
 import { TapButton } from "../components/TapButton";
 import type { ChartSnapshot, YaoSnapshot } from "../models/Gua";
 import type { YaoPositionCategory } from "../models/YaoPositionImages";
@@ -13,8 +14,6 @@ export function DivinePage({
   onUseYao,
   yaoPositionCategory,
   onYaoPositionCategoryChange,
-  expanded,
-  onToggleExpanded,
 }: {
   snapshot: ChartSnapshot | null;
   onCast: () => void;
@@ -23,9 +22,10 @@ export function DivinePage({
   onUseYao: (position: number | null) => void;
   yaoPositionCategory: YaoPositionCategory;
   onYaoPositionCategoryChange: (category: YaoPositionCategory) => void;
-  expanded: boolean;
-  onToggleExpanded: () => void;
 }) {
+  const [expanded, setExpanded] = useState(false);
+  const chartStageRef = useRef<HTMLDivElement>(null);
+
   return (
     <section className="page divine-page">
       <div className="page-title compact-title">
@@ -66,8 +66,13 @@ export function DivinePage({
             onInspect={onInspect}
             onUseYao={onUseYao}
             expanded={expanded}
+            stageRef={chartStageRef}
           />
-          <FixedExpandButton expanded={expanded} onClick={onToggleExpanded} />
+          <DrawingPanel
+            expanded={expanded}
+            onToggle={() => setExpanded(!expanded)}
+            captureTargetRef={chartStageRef}
+          />
         </>
       ) : (
         <div className="panel empty-cast-panel">

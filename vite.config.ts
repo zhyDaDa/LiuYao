@@ -4,6 +4,9 @@ import { codeInspectorPlugin } from "code-inspector-plugin";
 
 // https://vite.dev/config/
 export default defineConfig({
+  server: {
+    allowedHosts: ["dev.critical-art.arpa"],
+  },
   plugins: [
     codeInspectorPlugin({
       bundler: "vite",
