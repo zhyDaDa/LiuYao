@@ -29,6 +29,8 @@ import {
 import { branch2Element } from "../utils/branch2Element";
 import { createId } from "../utils/createId";
 
+const CODE_KEY = "liuyao@zhyDaDa";
+
 interface LiuYaoChartCode {
   question: string;
   remark: string;
@@ -41,11 +43,33 @@ interface LiuYaoChartCode {
 
 function encode(data: LiuYaoChartCode): string {
   if (data.yaos.length !== 6) {
-    throw new Error("六爻数据必须包含 6 个爻");
+    throw new Error("必须包含六个爻");
   }
 
-  if (data.question.length > 0x3fff) {
+  const encoder = new TextEncoder();
+  const questionBytes = encoder.encode(data.question);
+  const remarkBytes = encoder.encode(data.remark);
+
+  if (questionBytes.length > 0xffff) {
     throw new Error("占事内容过长");
+  }
+
+  /*
+   * 数据布局：
+   *
+   * 0~3：时间，精确到分钟
+   * 4~5：六爻状态，12 bit
+   * 6~7：question 的 UTF-8 字节长度
+   * 8~ ：question 和 remark 的 UTF-8 数据
+   */
+  const bytes = new Uint8Array(8 + questionBytes.length + remarkBytes.length);
+
+  const view = new DataView(bytes.buffer);
+
+  const minutes = Math.floor(data.createdAt / 60_000);
+
+  if (minutes < 0 || minutes > 0xffffffff) {
+    throw new Error("排盘时间超出编码范围");
   }
 
   let yaoBits = 0;
@@ -60,73 +84,147 @@ function encode(data: LiuYaoChartCode): string {
     }
   });
 
-  const minutes = Math.floor(data.createdAt / 60_000);
+  view.setUint32(0, minutes);
+  view.setUint16(4, yaoBits);
+  view.setUint16(6, questionBytes.length);
 
-  if (!Number.isSafeInteger(minutes) || minutes < 0 || minutes >= 2 ** 30) {
-    throw new Error("排盘时间超出可编码范围");
+  bytes.set(questionBytes, 8);
+  bytes.set(remarkBytes, 8 + questionBytes.length);
+
+  /*
+   * 简单异或混淆。
+   *
+   * 除了固定密钥，还混入字节位置，
+   * 避免相同字符总是产生完全相同的字节。
+   */
+  const keyBytes = encoder.encode(CODE_KEY);
+
+  for (let index = 0; index < bytes.length; index++) {
+    bytes[index] ^=
+      keyBytes[index % keyBytes.length] ^ ((index * 31 + 17) & 0xff);
   }
 
-  const packed = (BigInt(minutes) << 12n) | BigInt(yaoBits);
+  if (bytes.length > 0x7fff) {
+    throw new Error("存档内容过长");
+  }
 
-  return (
-    "卦" +
-    String.fromCharCode(
-      0x4e00 + Number((packed >> 28n) & 0x3fffn),
-      0x4e00 + Number((packed >> 14n) & 0x3fffn),
-      0x4e00 + Number(packed & 0x3fffn),
-      0x4e00 + data.question.length,
-    ) +
-    data.question +
-    data.remark +
-    "爻"
-  );
+  /*
+   * 每个字符保存 15 bit。
+   *
+   * 使用 U+3400 ~ U+B3FF，避开 UTF-16 代理区，
+   * 每个编码字符的 string.length 都是 1。
+   *
+   * 第一个字符保存原始字节数量。
+   */
+  let result = String.fromCharCode(0x3400 + bytes.length);
+  let buffer = 0;
+  let bitCount = 0;
+
+  for (const byte of bytes) {
+    buffer = (buffer << 8) | byte;
+    bitCount += 8;
+
+    while (bitCount >= 15) {
+      bitCount -= 15;
+
+      result += String.fromCharCode(0x3400 + ((buffer >> bitCount) & 0x7fff));
+
+      buffer &= (1 << bitCount) - 1;
+    }
+  }
+
+  if (bitCount > 0) {
+    result += String.fromCharCode(
+      0x3400 + ((buffer << (15 - bitCount)) & 0x7fff),
+    );
+  }
+
+  return result;
 }
 
 function decode(code: string): LiuYaoChartCode {
-  /*
-   * 前后有固定标记，因此可以安全清理用户复制时
-   * 意外带上的外部空白。
-   *
-   * question 和 remark 内部的空格不会被删除。
-   */
   const text = code.trim();
 
-  if (!text.startsWith("卦") || !text.endsWith("爻") || text.length < 6) {
+  if (!text) {
+    throw new Error("存档代码不能为空");
+  }
+
+  const byteLength = text.charCodeAt(0) - 0x3400;
+
+  if (byteLength < 0 || byteLength > 0x7fff) {
     throw new Error("存档代码格式错误");
   }
 
-  // 去除首尾标记。
-  const body = text.slice(1, -1);
+  const bytes = new Uint8Array(byteLength);
 
-  const values = Array.from(
-    { length: 4 },
-    (_, index) => body.charCodeAt(index) - 0x4e00,
-  );
+  let byteIndex = 0;
+  let buffer = 0;
+  let bitCount = 0;
 
-  if (
-    values.some(
-      (value) => !Number.isInteger(value) || value < 0 || value > 0x3fff,
-    )
-  ) {
-    throw new Error("存档代码头部无效");
+  for (let index = 1; index < text.length && byteIndex < byteLength; index++) {
+    const value = text.charCodeAt(index) - 0x3400;
+
+    if (value < 0 || value > 0x7fff) {
+      throw new Error("存档代码包含非法字符");
+    }
+
+    buffer = (buffer << 15) | value;
+    bitCount += 15;
+
+    while (bitCount >= 8 && byteIndex < byteLength) {
+      bitCount -= 8;
+
+      bytes[byteIndex++] = (buffer >> bitCount) & 0xff;
+
+      buffer &= (1 << bitCount) - 1;
+    }
   }
 
-  const packed =
-    (BigInt(values[0]) << 28n) | (BigInt(values[1]) << 14n) | BigInt(values[2]);
-
-  const questionLength = values[3];
-  const content = body.slice(4);
-
-  if (questionLength > content.length) {
-    throw new Error("存档代码内容不完整");
+  if (byteIndex !== byteLength) {
+    throw new Error("存档代码不完整");
   }
 
-  const yaoBits = Number(packed & 0xfffn);
-  const minutes = Number(packed >> 12n);
+  // 异或操作执行两次即可恢复原始数据。
+  const encoder = new TextEncoder();
+  const keyBytes = encoder.encode(CODE_KEY);
+
+  for (let index = 0; index < bytes.length; index++) {
+    bytes[index] ^=
+      keyBytes[index % keyBytes.length] ^ ((index * 31 + 17) & 0xff);
+  }
+
+  if (bytes.length < 8) {
+    throw new Error("存档数据不完整");
+  }
+
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+
+  const minutes = view.getUint32(0);
+  const yaoBits = view.getUint16(4);
+  const questionLength = view.getUint16(6);
+
+  if (8 + questionLength > bytes.length) {
+    throw new Error("存档内容长度错误");
+  }
+
+  const decoder = new TextDecoder("utf-8", {
+    fatal: true,
+  });
+
+  let question: string;
+  let remark: string;
+
+  try {
+    question = decoder.decode(bytes.slice(8, 8 + questionLength));
+
+    remark = decoder.decode(bytes.slice(8 + questionLength));
+  } catch {
+    throw new Error("存档文本解析失败");
+  }
 
   return {
-    question: content.slice(0, questionLength),
-    remark: content.slice(questionLength),
+    question,
+    remark,
     createdAt: minutes * 60_000,
 
     yaos: Array.from({ length: 6 }, (_, position) => ({

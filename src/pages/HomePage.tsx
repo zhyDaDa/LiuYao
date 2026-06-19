@@ -11,24 +11,6 @@ export function HomePage({
   onCast: () => void;
   archiveCount: number;
 }) {
-  function showDebug() {
-    Modal.show({
-      title: "调试信息",
-      content: (
-        <div className="debug-list">
-          <p>应用：周易六爻排盘系统</p>
-          <p>版本：0.1.0-alpha</p>
-          <p>UI：antd-mobile 优先</p>
-          <p>档案数量：{archiveCount}</p>
-          <p>规则状态：已接入基础排盘链路，旺衰规则可继续扩展</p>
-        </div>
-      ),
-      closeOnMaskClick: true,
-      closeOnAction: true,
-      actions: [{ key: "ok", text: "知道了" }],
-    });
-  }
-
   return (
     <section className="page home-page">
       <div className="page-title">
@@ -43,13 +25,14 @@ export function HomePage({
         <div>
           <Title level={2}>版本信息</Title>
           <Paragraph>
-            当前版本 0.2.5-alpha，已包含:
+            当前版本 0.3.0-alpha，已包含:
             <ul>
               <li>自动/手动/模拟起卦</li>
               <li>基本排盘</li>
               <li>排盘分析草稿</li>
               <li>十二长生</li>
               <li>存档管理</li>
+              <li>存档导入/导出</li>
               <li>速查表格</li>
               <li>规则集优化[增删全内容]</li>
             </ul>
@@ -58,9 +41,6 @@ export function HomePage({
         <div className="button-row">
           <TapButton color="primary" onTap={onCast}>
             起一卦
-          </TapButton>
-          <TapButton fill="outline" onTap={showDebug}>
-            调试
           </TapButton>
         </div>
       </div>
