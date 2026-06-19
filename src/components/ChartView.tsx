@@ -17,7 +17,11 @@ export function ChartView({
     <div className={expanded ? "chart-stage expanded-stage" : "chart-stage"}>
       <div className="chart-layout">
         <CalendarPanel snapshot={snapshot} />
-        <GuaBoard snapshot={snapshot} onInspect={onInspect} onUseYao={onUseYao} />
+        <GuaBoard
+          snapshot={snapshot}
+          onInspect={onInspect}
+          onUseYao={onUseYao}
+        />
       </div>
     </div>
   );

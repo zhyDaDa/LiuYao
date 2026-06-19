@@ -6,6 +6,7 @@ import { TapButton } from "../components/TapButton";
 import type { ChartSnapshot, YaoSnapshot } from "../models/Gua";
 import type { YaoPositionCategory } from "../models/YaoPositionImages";
 import { YAO_POSITION_CATEGORY_OPTIONS } from "../models/YaoPositionImages";
+import { NotePad } from "../components/NotePad";
 
 const { Paragraph } = Typography;
 
@@ -14,6 +15,7 @@ export function DivinePage({
   onCast,
   onSave,
   onRename,
+  onEditRemark,
   onInspect,
   onUseYao,
   yaoPositionCategory,
@@ -23,6 +25,7 @@ export function DivinePage({
   onCast: () => void;
   onSave: () => void;
   onRename: (name: string) => void;
+  onEditRemark: (remark: string) => void;
   onInspect: (yao: YaoSnapshot) => void;
   onUseYao: (position: number | null) => void;
   yaoPositionCategory: YaoPositionCategory;
@@ -48,7 +51,6 @@ export function DivinePage({
           {snapshot?.question ?? "等待起卦"}
         </Paragraph>
       </div>
-
       <div className="action-strip">
         <TapButton color="primary" onTap={onCast}>
           重新起卦
@@ -83,6 +85,7 @@ export function DivinePage({
             onUseYao={onUseYao}
             expanded={expanded}
           />
+          <NotePad snapshot={snapshot} onEditRemark={onEditRemark} />
           <DrawingPanel
             expanded={expanded}
             onToggle={() => setExpanded(!expanded)}

@@ -115,6 +115,33 @@ function App() {
     Toast.show({ content: "排盘名称已更新" });
   }
 
+  function editCurrentRemark(nextRemark: string) {
+    const remark = nextRemark.trim();
+
+    if (!chart) return;
+
+    const nextChart = new LiuYaoChart(
+      chart.yaos,
+      chart.question,
+      chart.createdAt,
+      chart.id,
+      remark,
+    );
+
+    const nextSnapshot = nextChart.toSnapshot(
+      useYaoPosition,
+      yaoPositionCategory,
+    );
+    const nextArchive = archive.map((item) =>
+      item.id === nextSnapshot.id ? nextSnapshot : item,
+    );
+
+    setChart(nextChart);
+    setArchive(nextArchive);
+    writeArchive(nextArchive);
+    Toast.show({ content: "备注已更新" });
+  }
+
   function loadArchive(item: ChartSnapshot) {
     setChart(LiuYaoChart.fromSnapshot(item));
     setUseYaoPosition(item.useYaoPosition ?? null);
@@ -175,6 +202,7 @@ function App() {
             onCast={openCastPopup}
             onSave={saveCurrent}
             onRename={renameCurrent}
+            onEditRemark={editCurrentRemark}
             onInspect={setSelectedYao}
             onUseYao={setUseYaoPosition}
             yaoPositionCategory={yaoPositionCategory}

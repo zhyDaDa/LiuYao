@@ -30,47 +30,111 @@ import { branch2Element } from "../utils/branch2Element";
 import { createId } from "../utils/createId";
 
 interface LiuYaoChartCode {
-  id: string;
   question: string;
   remark: string;
-  createdAt: string;
+  createdAt: number;
   yaos: Array<{
-    position: number;
     isYang: boolean;
     isMoving: boolean;
   }>;
 }
 
 function encode(data: LiuYaoChartCode): string {
-  const json = JSON.stringify(data);
-  const bytes = new TextEncoder().encode(json);
-
-  let binary = "";
-
-  for (const byte of bytes) {
-    binary += String.fromCharCode(byte);
+  if (data.yaos.length !== 6) {
+    throw new Error("六爻数据必须包含 6 个爻");
   }
 
-  return btoa(binary)
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/, "");
+  if (data.question.length > 0x3fff) {
+    throw new Error("占事内容过长");
+  }
+
+  let yaoBits = 0;
+
+  data.yaos.forEach((yao, position) => {
+    if (yao.isYang) {
+      yaoBits |= 1 << (position * 2);
+    }
+
+    if (yao.isMoving) {
+      yaoBits |= 1 << (position * 2 + 1);
+    }
+  });
+
+  const minutes = Math.floor(data.createdAt / 60_000);
+
+  if (!Number.isSafeInteger(minutes) || minutes < 0 || minutes >= 2 ** 30) {
+    throw new Error("排盘时间超出可编码范围");
+  }
+
+  const packed = (BigInt(minutes) << 12n) | BigInt(yaoBits);
+
+  return (
+    "卦" +
+    String.fromCharCode(
+      0x4e00 + Number((packed >> 28n) & 0x3fffn),
+      0x4e00 + Number((packed >> 14n) & 0x3fffn),
+      0x4e00 + Number(packed & 0x3fffn),
+      0x4e00 + data.question.length,
+    ) +
+    data.question +
+    data.remark +
+    "爻"
+  );
 }
 
 function decode(code: string): LiuYaoChartCode {
-  const base64 = code.replace(/\s+/g, "").replace(/-/g, "+").replace(/_/g, "/");
+  /*
+   * 前后有固定标记，因此可以安全清理用户复制时
+   * 意外带上的外部空白。
+   *
+   * question 和 remark 内部的空格不会被删除。
+   */
+  const text = code.trim();
 
-  const padded = base64.padEnd(
-    base64.length + ((4 - (base64.length % 4)) % 4),
-    "=",
+  if (!text.startsWith("卦") || !text.endsWith("爻") || text.length < 6) {
+    throw new Error("存档代码格式错误");
+  }
+
+  // 去除首尾标记。
+  const body = text.slice(1, -1);
+
+  const values = Array.from(
+    { length: 4 },
+    (_, index) => body.charCodeAt(index) - 0x4e00,
   );
 
-  const binary = atob(padded);
-  const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+  if (
+    values.some(
+      (value) => !Number.isInteger(value) || value < 0 || value > 0x3fff,
+    )
+  ) {
+    throw new Error("存档代码头部无效");
+  }
 
-  const json = new TextDecoder().decode(bytes);
+  const packed =
+    (BigInt(values[0]) << 28n) | (BigInt(values[1]) << 14n) | BigInt(values[2]);
 
-  return JSON.parse(json) as LiuYaoChartCode;
+  const questionLength = values[3];
+  const content = body.slice(4);
+
+  if (questionLength > content.length) {
+    throw new Error("存档代码内容不完整");
+  }
+
+  const yaoBits = Number(packed & 0xfffn);
+  const minutes = Number(packed >> 12n);
+
+  return {
+    question: content.slice(0, questionLength),
+    remark: content.slice(questionLength),
+    createdAt: minutes * 60_000,
+
+    yaos: Array.from({ length: 6 }, (_, position) => ({
+      isYang: (yaoBits & (1 << (position * 2))) !== 0,
+
+      isMoving: (yaoBits & (1 << (position * 2 + 1))) !== 0,
+    })),
+  };
 }
 
 export interface YaoSnapshot {
@@ -507,12 +571,10 @@ export class LiuYaoChart {
 
   exportToCode(): string {
     return encode({
-      id: this.id,
       question: this.question,
       remark: this.remark,
-      createdAt: this.createdAt.toISOString(),
+      createdAt: this.createdAt.getTime(),
       yaos: this.yaos.map((yao) => ({
-        position: yao.position,
         isYang: yao.isYang,
         isMoving: yao.isMoving,
       })),
@@ -522,15 +584,13 @@ export class LiuYaoChart {
   static importFromCode(code: string): LiuYaoChart {
     const data = decode(code);
 
-    if (data.yaos.length !== 6) {
-      throw new Error("存档代码中的爻数据不完整");
-    }
-
     return new LiuYaoChart(
-      data.yaos.map((yao) => new Yao(yao.position, yao.isYang, yao.isMoving)),
+      data.yaos.map(
+        (yao, position) => new Yao(position, yao.isYang, yao.isMoving),
+      ),
       data.question,
       new Date(data.createdAt),
-      data.id,
+      createId("chart"),
       data.remark,
     );
   }
