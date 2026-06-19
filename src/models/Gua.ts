@@ -29,6 +29,50 @@ import {
 import { branch2Element } from "../utils/branch2Element";
 import { createId } from "../utils/createId";
 
+interface LiuYaoChartCode {
+  id: string;
+  question: string;
+  remark: string;
+  createdAt: string;
+  yaos: Array<{
+    position: number;
+    isYang: boolean;
+    isMoving: boolean;
+  }>;
+}
+
+function encode(data: LiuYaoChartCode): string {
+  const json = JSON.stringify(data);
+  const bytes = new TextEncoder().encode(json);
+
+  let binary = "";
+
+  for (const byte of bytes) {
+    binary += String.fromCharCode(byte);
+  }
+
+  return btoa(binary)
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+}
+
+function decode(code: string): LiuYaoChartCode {
+  const base64 = code.replace(/\s+/g, "").replace(/-/g, "+").replace(/_/g, "/");
+
+  const padded = base64.padEnd(
+    base64.length + ((4 - (base64.length % 4)) % 4),
+    "=",
+  );
+
+  const binary = atob(padded);
+  const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+
+  const json = new TextDecoder().decode(bytes);
+
+  return JSON.parse(json) as LiuYaoChartCode;
+}
+
 export interface YaoSnapshot {
   position: number;
   name: string;
@@ -167,7 +211,7 @@ const GUA_NAMES: Record<string, string> = {
   坎离: "水火既济",
   离坎: "火水未济",
 } as const;
-export type GuaName = typeof GUA_NAMES[keyof typeof GUA_NAMES];
+export type GuaName = (typeof GUA_NAMES)[keyof typeof GUA_NAMES];
 
 export class Yao {
   public readonly position: number;
@@ -282,7 +326,10 @@ export class LiuYaoChart {
         relative: getRelative(world.palaceElement, element),
         changedBranch,
         changedElement,
-        changedRelative: getRelative(changedWorld.palaceElement, changedElement),
+        changedRelative: getRelative(
+          changedWorld.palaceElement,
+          changedElement,
+        ),
         isMoving: yao.isMoving,
         isDarkMoving: false,
       };
@@ -457,6 +504,40 @@ export class LiuYaoChart {
       (_, index) => SIX_SPIRIT_NAMES[(start + index) % SIX_SPIRIT_NAMES.length],
     );
   }
+
+  exportToCode(): string {
+    return encode({
+      id: this.id,
+      question: this.question,
+      remark: this.remark,
+      createdAt: this.createdAt.toISOString(),
+      yaos: this.yaos.map((yao) => ({
+        position: yao.position,
+        isYang: yao.isYang,
+        isMoving: yao.isMoving,
+      })),
+    });
+  }
+
+  static importFromCode(code: string): LiuYaoChart {
+    const data = decode(code);
+
+    if (data.yaos.length !== 6) {
+      throw new Error("存档代码中的爻数据不完整");
+    }
+
+    return new LiuYaoChart(
+      data.yaos.map((yao) => new Yao(yao.position, yao.isYang, yao.isMoving)),
+      data.question,
+      new Date(data.createdAt),
+      data.id,
+      data.remark,
+    );
+  }
+
+  static importFromText(text: string): LiuYaoChart {
+    throw new Error("TODO: 此功能尚待开发 ///-_-💧");
+  }
 }
 
 function getRelative(
@@ -470,7 +551,10 @@ function getRelative(
   return "妻财";
 }
 
-function getUseSpiritRole(yao: YaoSnapshot, useYao: YaoSnapshot): UseSpiritRole {
+function getUseSpiritRole(
+  yao: YaoSnapshot,
+  useYao: YaoSnapshot,
+): UseSpiritRole {
   if (yao.position === useYao.position) return "用";
   if (FIVE_ELEMENT_GENERATES[yao.element] === useYao.element) return "元";
   if (FIVE_ELEMENT_CONTROLS[yao.element] === useYao.element) return "忌";

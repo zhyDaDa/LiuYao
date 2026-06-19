@@ -36,11 +36,15 @@ export function writeArchive(items: ChartSnapshot[]) {
   localStorage.setItem(ARCHIVE_KEY, JSON.stringify(items));
 }
 
-export function snapshotToArchiveDraft(snapshot: ChartSnapshot): ArchiveEditDraft {
+export function snapshotToArchiveDraft(
+  snapshot: ChartSnapshot,
+): ArchiveEditDraft {
   return {
     question: snapshot.question,
     createdAt: formatDateTimeInput(new Date(snapshot.calendar.createdAt)),
-    yaos: snapshot.yaos.map((yao) => yaoToArchiveYaoValue(yao.isYang, yao.isMoving)),
+    yaos: snapshot.yaos.map((yao) =>
+      yaoToArchiveYaoValue(yao.isYang, yao.isMoving),
+    ),
     remark: snapshot.remark ?? "",
   };
 }
@@ -72,7 +76,10 @@ function archiveYaoValueToYao(value: ArchiveYaoValue, position: number) {
   return new Yao(position, isYang, isMoving);
 }
 
-function yaoToArchiveYaoValue(isYang: boolean, isMoving: boolean): ArchiveYaoValue {
+function yaoToArchiveYaoValue(
+  isYang: boolean,
+  isMoving: boolean,
+): ArchiveYaoValue {
   if (isYang && isMoving) return "oldYang";
   if (isYang) return "youngYang";
   if (isMoving) return "oldYin";

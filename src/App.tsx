@@ -71,10 +71,14 @@ function App() {
       Toast.show({ content: "请先起卦再存档" });
       return;
     }
+    saveSnapshot(snapshot);
+  }
+
+  function saveSnapshot(snapshot: ChartSnapshot) {
     const nextArchive = [
       snapshot,
       ...archive.filter((item) => item.id !== snapshot.id),
-    ].slice(0, 30);
+    ];
     setArchive(nextArchive);
     writeArchive(nextArchive);
     Toast.show({ content: "已保存到档案库" });
@@ -184,6 +188,7 @@ function App() {
             onLoad={loadArchive}
             onEdit={setArchiveEdit}
             onDelete={deleteArchive}
+            onSave={saveSnapshot}
           />
         )}
         {activeKey === "tables" && <TablesPage />}

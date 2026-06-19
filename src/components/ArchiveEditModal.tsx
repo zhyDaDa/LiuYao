@@ -69,6 +69,7 @@ export function ArchiveEditModal({
               <input
                 value={draft.question}
                 maxLength={40}
+                
                 placeholder="例如：工作选择"
                 onChange={(event) =>
                   updateDraft("question", event.target.value)
