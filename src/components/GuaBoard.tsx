@@ -1,6 +1,8 @@
 import { useRef } from "react";
 import type { CSSProperties } from "react";
 import type { ChartSnapshot, YaoSnapshot } from "../models/Gua";
+import { Flex } from "antd";
+import { compareYaoForSKCH } from "../utils/SKCH";
 
 export function GuaBoard({
   snapshot,
@@ -25,6 +27,7 @@ export function GuaBoard({
           <YaoRow
             key={yao.position}
             yao={yao}
+            snapshot={snapshot}
             onInspect={onInspect}
             onUseYao={onUseYao}
             isUsed={useYaoPosition === yao.position}
@@ -37,11 +40,13 @@ export function GuaBoard({
 
 function YaoRow({
   yao,
+  snapshot,
   onInspect,
   onUseYao,
   isUsed,
 }: {
   yao: YaoSnapshot;
+  snapshot: ChartSnapshot;
   onInspect: (yao: YaoSnapshot) => void;
   onUseYao: (position: number | null) => void;
   isUsed: boolean;
@@ -63,7 +68,7 @@ function YaoRow({
       window.clearTimeout(timerRef.current);
       timerRef.current = null;
     }
-  } 
+  }
 
   function handleClick() {
     if (longPressRef.current) {
@@ -87,17 +92,15 @@ function YaoRow({
         .join("\n")}
     >
       <span className="spirit">{yao.spirit}</span>
-      <GuaLineCell yao={yao} />
+      <GuaLineCell yao={yao} snapshot={snapshot} />
       <span
         className={
-          yao.isMoving || yao.isDarkMoving
-            ? "move-mark is-moving"
-            : "move-mark"
+          yao.isMoving || yao.isDarkMoving ? "move-mark is-moving" : "move-mark"
         }
       >
         {getMoveMark(yao)}
       </span>
-      <GuaLineCell yao={yao} changed />
+      <GuaLineCell yao={yao} snapshot={snapshot} changed />
       <span className="hover-tip">{yao.traces[0]?.reason}</span>
     </button>
   );
@@ -105,9 +108,11 @@ function YaoRow({
 
 function GuaLineCell({
   yao,
+  snapshot,
   changed = false,
 }: {
   yao: YaoSnapshot;
+  snapshot: ChartSnapshot;
   changed?: boolean;
 }) {
   const strengthClass =
@@ -116,19 +121,50 @@ function GuaLineCell({
       : "";
   const useSpiritClass = !changed && yao.useSpiritRole ? "has-use-spirit" : "";
   const useSpiritMarkClass =
-    !changed && yao.useSpiritRole ? getUseSpiritMarkClass(yao.useSpiritRole) : "";
+    !changed && yao.useSpiritRole
+      ? getUseSpiritMarkClass(yao.useSpiritRole)
+      : "";
+
+  // 判断常用信息
+  const monthEffect = compareYaoForSKCH(
+    snapshot.calendar.monthBranch,
+    yao.branch,
+  );
+  const dayEffect = compareYaoForSKCH(snapshot.calendar.dayBranch, yao.branch);
+  const voidEffect = snapshot.calendar.dayVoidBranches.includes(yao.branch);
+
   return (
     <span className={`gua-line-cell ${strengthClass} ${useSpiritClass}`}>
       <span
         className={`gua-text ${useSpiritMarkClass}`}
-        data-use-spirit-role={!changed && yao.useSpiritRole ? yao.useSpiritRole : undefined}
+        data-use-spirit-role={
+          !changed && yao.useSpiritRole ? yao.useSpiritRole : undefined
+        }
         style={getStrengthStyle(yao, changed)}
       >
+        <Flex className="tags upper" justify="space-between">
+          {monthEffect === "无" ? (
+            <span />
+          ) : (
+            <span className="month">月{monthEffect}</span>
+          )}
+          {voidEffect && <span className="void">空</span>}
+          {dayEffect === "无" ? (
+            <span />
+          ) : (
+            <span className="day">日{dayEffect}</span>
+          )}
+        </Flex>
         <b>
           {changed ? yao.changedRelative : yao.relative}
           {changed ? yao.changedBranch : yao.branch}
           {changed ? yao.changedElement : yao.element}
         </b>
+        <Flex className="tags lower" justify="space-between">
+          {/* <span>123</span>
+          <span>456</span> */}
+        </Flex>
+        <Flex></Flex>
       </span>
       <LineMark isYang={changed ? yao.changedIsYang : yao.isYang} />
       <span className="role-mark">{changed ? yao.changedRole : yao.role}</span>

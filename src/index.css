@@ -419,6 +419,36 @@ h2 {
   pointer-events: none;
 }
 
+.gua-text .tags {
+  position: absolute;
+  font-size: smaller;
+  line-height: 0.8;
+  width: 100%;
+}
+.gua-text .tags.upper {
+  transform: translateY(-100%);
+}
+.gua-text .tags.lower {
+  bottom: 0;
+  transform: translateY(100%);
+}
+.gua-text .tags span {
+  padding: 1px 2px;
+  border-radius: 2px;
+}
+.gua-text .tags span.month {
+  color: white;
+  background-color: var(--green);
+}
+.gua-text .tags span.void {
+  color: white;
+  background-color: var(--muted);
+}
+.gua-text .tags span.day {
+  color: white;
+  background-color: var(--amber);
+}
+
 .gua-text.is-use-role::before {
   color: var(--ink);
 }

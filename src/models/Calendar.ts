@@ -19,6 +19,10 @@ export interface CalendarInfo {
   month: GanZhiName;
   day: GanZhiName;
   hour: GanZhiName;
+  yearBranch: BranchName;
+  monthBranch: BranchName;
+  dayBranch: BranchName;
+  hourBranch: BranchName;
   yearVoidBranches: VoidBranches;
   monthVoidBranches: VoidBranches;
   dayVoidBranches: VoidBranches;
@@ -45,20 +49,20 @@ export class LiuYaoTime {
   }
 
   toCalendarInfo(): CalendarInfo {
+    // ==================== 基础日期信息 ====================
     const year = this.date.getFullYear();
     const month = this.date.getMonth() + 1;
-    const dayGanZhiIndex = getDayGanZhiIndex(this.date);
-    const dayStemIndex = dayGanZhiIndex % 10;
-    const hourBranchIndex = Math.floor(((this.date.getHours() + 1) % 24) / 2);
-    const hourStemStart = [0, 2, 4, 6, 8][dayStemIndex % 5];
-    const hourStemIndex = (hourStemStart + hourBranchIndex) % 10;
-    const hourGanZhi =
-      `${STEM_NAMES[hourStemIndex]}${BRANCH_NAMES[hourBranchIndex]}` as GanZhiName;
+
+    // ==================== 年柱计算 ====================
     const yearGanZhiIndexValue = mod(year - 4, 60);
     const yearGanZhi = JIA_ZI[yearGanZhiIndexValue];
-    const monthBranchIndex = mod(month, 12);
-    const monthStemStartByYearStem = [2, 4, 6, 8, 0, 2, 4, 6, 8, 0];
+    const yearBranch = getGanZhiBranch(yearGanZhi);
     const yearStem = getGanZhiStem(yearGanZhi);
+
+    // ==================== 月柱计算 ====================
+    const monthBranchIndex = mod(month, 12);
+    const monthBranch = BRANCH_NAMES[monthBranchIndex];
+    const monthStemStartByYearStem = [2, 4, 6, 8, 0, 2, 4, 6, 8, 0];
     const monthStemIndex =
       (monthStemStartByYearStem[STEM_NAMES.indexOf(yearStem)] +
         monthBranchIndex -
@@ -67,8 +71,19 @@ export class LiuYaoTime {
     const monthGanZhi =
       `${STEM_NAMES[mod(monthStemIndex, 10)]}${BRANCH_NAMES[monthBranchIndex]}` as GanZhiName;
 
+    // ==================== 日柱计算 ====================
+    const dayGanZhiIndex = getDayGanZhiIndex(this.date);
     const dayGanZhi = JIA_ZI[dayGanZhiIndex];
     const dayBranch = getGanZhiBranch(dayGanZhi);
+    const dayStemIndex = dayGanZhiIndex % 10;
+
+    // ==================== 时柱计算 ====================
+    const hourBranchIndex = Math.floor(((this.date.getHours() + 1) % 24) / 2);
+    const hourBranch = BRANCH_NAMES[hourBranchIndex];
+    const hourStemStart = [0, 2, 4, 6, 8][dayStemIndex % 5];
+    const hourStemIndex = (hourStemStart + hourBranchIndex) % 10;
+    const hourGanZhi =
+      `${STEM_NAMES[hourStemIndex]}${BRANCH_NAMES[hourBranchIndex]}` as GanZhiName;
 
     return {
       createdAt: this.date.toISOString(),
@@ -76,6 +91,10 @@ export class LiuYaoTime {
       month: monthGanZhi,
       day: dayGanZhi,
       hour: hourGanZhi,
+      yearBranch: yearBranch,
+      monthBranch: monthBranch,
+      dayBranch: dayBranch,
+      hourBranch: hourBranch,
       yearVoidBranches: getVoidBranches(yearGanZhiIndexValue),
       monthVoidBranches: getVoidBranches(JIA_ZI.indexOf(monthGanZhi)),
       dayVoidBranches: getVoidBranches(dayGanZhiIndex),
