@@ -1,16 +1,9 @@
-import { Modal } from "antd-mobile";
 import { TapButton } from "../components/TapButton";
 import { Typography } from "antd";
 
 const { Paragraph, Title, Text, Link } = Typography;
 
-export function HomePage({
-  onCast,
-  archiveCount,
-}: {
-  onCast: () => void;
-  archiveCount: number;
-}) {
+export function HomePage({ onCast }: { onCast: () => void }) {
   return (
     <section className="page home-page">
       <div className="page-title">

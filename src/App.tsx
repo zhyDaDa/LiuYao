@@ -193,9 +193,7 @@ function App() {
   return (
     <div className={"app"}>
       <main className="app-main">
-        {activeKey === "home" && (
-          <HomePage onCast={openCastPopup} archiveCount={archive.length} />
-        )}
+        {activeKey === "home" && <HomePage onCast={openCastPopup} />}
         {activeKey === "divine" && (
           <DivinePage
             snapshot={snapshot}

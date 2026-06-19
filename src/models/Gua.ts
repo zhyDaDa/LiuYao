@@ -694,7 +694,7 @@ export class LiuYaoChart {
   }
 
   static importFromText(text: string): LiuYaoChart {
-    throw new Error("TODO: 此功能尚待开发 ///-_-💧");
+    throw new Error(`TODO: 此功能尚待开发 ///-_-💧, 你的输入是:${text}`);
   }
 }
 
