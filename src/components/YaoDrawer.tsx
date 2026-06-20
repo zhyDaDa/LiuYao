@@ -2,16 +2,30 @@ import { Popup } from "antd-mobile";
 import type { YaoSnapshot } from "../models/Gua";
 import type { RuleActor, RuleTrace } from "../models/Rules";
 import { TapButton } from "./TapButton";
+import type { ReactNode } from "react";
 
-export function YaoDrawer({ yao, onClose }: { yao: YaoSnapshot | null; onClose: () => void }) {
+export function YaoDrawer({
+  yao,
+  onClose,
+}: {
+  yao: YaoSnapshot | null;
+  onClose: () => void;
+}) {
   return (
-    <Popup visible={Boolean(yao)} onMaskClick={onClose} position="right" bodyClassName="rule-drawer">
+    <Popup
+      visible={Boolean(yao)}
+      onMaskClick={onClose}
+      position="right"
+      bodyClassName="rule-drawer"
+    >
       {yao && (
         <div className="drawer-content">
           <div className="drawer-title">
             <span>{yao.spirit}</span>
             <h2>
-              {yao.name} · {yao.relative}{yao.branch}{yao.element}
+              {yao.name} · {yao.relative}
+              {yao.branch}
+              {yao.element}
             </h2>
             <p>
               当前判断：{yao.strengthLabel}，综合分 {yao.strength}
@@ -26,13 +40,46 @@ export function YaoDrawer({ yao, onClose }: { yao: YaoSnapshot | null; onClose: 
                   <em>{trace.score > 0 ? `+${trace.score}` : trace.score}</em>
                 </strong>
                 <p>
-                  {formatRuleActors(trace.source)} → {formatRuleActors(trace.target)}
+                  {formatRuleActors(trace.source)} →{" "}
+                  {formatRuleActors(trace.target)}
                   {" · "}
                   {trace.effect}
                 </p>
                 <p>{trace.reason}</p>
               </div>
             ))}
+          </div>
+          <TapButton block color="primary" onTap={onClose}>
+            关闭
+          </TapButton>
+        </div>
+      )}
+    </Popup>
+  );
+}
+
+export function InfoDrawer({
+  info,
+  onClose,
+}: {
+  info: ReactNode | string | null;
+  onClose: () => void;
+}) {
+  return (
+    <Popup
+      visible={Boolean(info)}
+      onMaskClick={onClose}
+      position="right"
+      bodyClassName="info-drawer" 
+    >
+      {info && (
+        <div className="drawer-content">
+          <div className="info-text">
+            {typeof info === "string" ? (
+              <p style={{ whiteSpace: "pre-wrap" }}>{info}</p>
+            ) : (
+              info
+            )}
           </div>
           <TapButton block color="primary" onTap={onClose}>
             关闭

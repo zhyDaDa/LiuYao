@@ -7,6 +7,7 @@ import type { ChartSnapshot, YaoSnapshot } from "../models/Gua";
 import type { YaoPositionCategory } from "../models/YaoPositionImages";
 import { YAO_POSITION_CATEGORY_OPTIONS } from "../models/YaoPositionImages";
 import { NotePad } from "../components/NotePad";
+import type { SimpleInfo } from "../App";
 
 const { Paragraph } = Typography;
 
@@ -17,6 +18,7 @@ export function DivinePage({
   onRename,
   onEditRemark,
   onInspect,
+  onSimpleInfo,
   onUseYao,
   yaoPositionCategory,
   onYaoPositionCategoryChange,
@@ -27,6 +29,7 @@ export function DivinePage({
   onRename: (name: string) => void;
   onEditRemark: (remark: string) => void;
   onInspect: (yao: YaoSnapshot) => void;
+  onSimpleInfo: (info: SimpleInfo) => void;
   onUseYao: (position: number | null) => void;
   yaoPositionCategory: YaoPositionCategory;
   onYaoPositionCategoryChange: (category: YaoPositionCategory) => void;
@@ -82,6 +85,7 @@ export function DivinePage({
           <ChartView
             snapshot={snapshot}
             onInspect={onInspect}
+            onSimpleInfo={onSimpleInfo}
             onUseYao={onUseYao}
             expanded={expanded}
           />

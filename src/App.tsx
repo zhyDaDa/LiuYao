@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
+import type { ReactNode } from "react";
 import { Dialog, Toast } from "antd-mobile";
 import { ArchiveEditModal } from "./components/ArchiveEditModal";
 import { ArchiveModal } from "./components/ArchiveModal";
 import { BottomNav } from "./components/BottomNav";
 import { CastPopup } from "./components/CastPopup";
-import { YaoDrawer } from "./components/YaoDrawer";
+import { InfoDrawer, YaoDrawer } from "./components/YaoDrawer";
 import { readArchive, writeArchive } from "./models/Archive";
 import type { ChartSnapshot, YaoSnapshot } from "./models/Gua";
 import { LiuYaoChart, Yao } from "./models/Gua";
@@ -17,11 +18,14 @@ import { TablesPage } from "./pages/ReferencePage";
 import type { CastInfo, CastSubmitPayload } from "./types/cast";
 import type { PageKey } from "./types/navigation";
 
+export type SimpleInfo = ReactNode | string | null;
+
 function App() {
   const [activeKey, setActiveKey] = useState<PageKey>("home");
   const [chart, setChart] = useState<LiuYaoChart | null>(null);
   const [archive, setArchive] = useState<ChartSnapshot[]>(readArchive);
   const [selectedYao, setSelectedYao] = useState<YaoSnapshot | null>(null);
+  const [simpleInfo, setSimpleInfo] = useState<SimpleInfo>(null);
   const [archivePreview, setArchivePreview] = useState<ChartSnapshot | null>(
     null,
   );
@@ -202,6 +206,7 @@ function App() {
             onRename={renameCurrent}
             onEditRemark={editCurrentRemark}
             onInspect={setSelectedYao}
+            onSimpleInfo={setSimpleInfo}
             onUseYao={setUseYaoPosition}
             yaoPositionCategory={yaoPositionCategory}
             onYaoPositionCategoryChange={setYaoPositionCategory}
@@ -228,6 +233,7 @@ function App() {
         onManualCast={castManual}
       />
       <YaoDrawer yao={selectedYao} onClose={() => setSelectedYao(null)} />
+      <InfoDrawer info={simpleInfo} onClose={() => setSimpleInfo(null)} />
       <ArchiveModal
         item={archivePreview}
         onClose={() => setArchivePreview(null)}

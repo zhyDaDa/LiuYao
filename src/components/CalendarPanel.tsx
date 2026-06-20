@@ -1,11 +1,44 @@
+import { Tag } from "antd-mobile";
+import type { SimpleInfo } from "../App";
 import type { ChartSnapshot } from "../models/Gua";
 import { TwelveLifeStages } from "./TwelveLifeStages";
+import { specialGuaChangeKnowledges } from "../models/RuleKnowledge";
 
-export function CalendarPanel({ snapshot }: { snapshot: ChartSnapshot }) {
+export function CalendarPanel({
+  snapshot,
+  onSimpleInfo,
+}: {
+  snapshot: ChartSnapshot;
+  onSimpleInfo: (info: SimpleInfo) => void;
+}) {
   const selectedUseYao = snapshot.yaos.find(
     (yao) => yao.position === snapshot.useYaoPosition,
   );
   const lifeStageElement = selectedUseYao?.element ?? snapshot.palaceElement;
+  const handleGuaSummaryInfo = () => {
+    const { originalName, originalType, changedName, changedType } = snapshot;
+    const changeMode = `${originalType}变${changedType}`;
+    let specialChangeKnowledge = specialGuaChangeKnowledges[changeMode];
+    if (!specialChangeKnowledge) {
+      specialChangeKnowledge =
+        specialGuaChangeKnowledges[`${originalType}`] ||
+        specialGuaChangeKnowledges[`${changedType}`];
+    }
+    onSimpleInfo(
+      <>
+        <h3>概览</h3>
+        <p>
+          <Tag>{originalName}</Tag> 变 <Tag>{changedName}</Tag>
+        </p>
+        {specialChangeKnowledge && (
+          <>
+            <h3>特殊变化</h3>
+            <p>{specialChangeKnowledge}</p>
+          </>
+        )}
+      </>,
+    );
+  };
 
   return (
     <div className="chart-side">
@@ -28,11 +61,13 @@ export function CalendarPanel({ snapshot }: { snapshot: ChartSnapshot }) {
         </div>
       </div>
 
-      <TwelveLifeStages
-        element={lifeStageElement}
-      />
+      <TwelveLifeStages element={lifeStageElement} />
 
-      <div className="gua-summary">
+      <button
+        type="button"
+        className="gua-summary"
+        onClick={handleGuaSummaryInfo}
+      >
         <div>
           <span>本卦</span>
           <strong>
@@ -55,7 +90,7 @@ export function CalendarPanel({ snapshot }: { snapshot: ChartSnapshot }) {
             {snapshot.changedPalace}宫 {snapshot.changedPalaceElement}
           </em>
         </div>
-      </div>
+      </button>
     </div>
   );
 }

@@ -272,6 +272,19 @@ h2 {
 
 .gua-summary {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  position: relative;
+  width: 100%;
+  min-height: 46px;
+  padding: 0;
+  border: 0;
+  color: var(--text);
+
+  background: transparent;
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .gua-summary div {
@@ -604,7 +617,8 @@ h2 {
   user-select: none;
 }
 
-.rule-drawer {
+.rule-drawer,
+.info-drawer {
   width: min(86vw, 390px);
   height: 100svh;
   max-height: 100svh;
@@ -614,7 +628,8 @@ h2 {
   -ms-overflow-style: none;
 }
 
-.rule-drawer::-webkit-scrollbar {
+.rule-drawer::-webkit-scrollbar,
+.info-drawer::-webkit-scrollbar {
   display: none;
 }
 
