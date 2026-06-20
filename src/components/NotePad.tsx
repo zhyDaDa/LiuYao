@@ -28,8 +28,9 @@ export const NotePad = ({
           },
           triggerType: ["icon"],
         }}
+        type={remark ? undefined : "secondary"}
       >
-        {remark}
+        {remark ? remark : "可以在这里添加备注..."}
       </Typography.Paragraph>
     </div>
   );

@@ -18,7 +18,7 @@ export function HomePage({ onCast }: { onCast: () => void }) {
         <div>
           <Title level={2}>版本信息</Title>
           <Paragraph>
-            当前版本 0.3.0-alpha，已包含:
+            当前版本 0.3.1-alpha，已包含:
             <ul>
               <li>自动/手动/模拟起卦</li>
               <li>基本排盘</li>
