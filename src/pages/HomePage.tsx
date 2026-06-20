@@ -1,9 +1,11 @@
 import { TapButton } from "../components/TapButton";
 import { Typography } from "antd";
+import { useAppTour } from "../tour/tourProvider";
 
 const { Paragraph, Title, Text, Link } = Typography;
 
 export function HomePage({ onCast }: { onCast: () => void }) {
+  const { startTour, registerTarget } = useAppTour();
   return (
     <section className="page home-page">
       <div className="page-title">
@@ -32,8 +34,16 @@ export function HomePage({ onCast }: { onCast: () => void }) {
           </Paragraph>
         </div>
         <div className="button-row">
-          <TapButton color="primary" onTap={onCast}>
-            起一卦
+          <span
+            ref={registerTarget("start-cast")}
+            style={{ display: "inline-block" }}
+          >
+            <TapButton color="primary" onTap={onCast}>
+              起一卦
+            </TapButton>
+          </span>
+          <TapButton color="secondary" onTap={startTour}>
+            使用引导
           </TapButton>
         </div>
       </div>

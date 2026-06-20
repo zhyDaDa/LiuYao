@@ -17,6 +17,7 @@ import { HomePage } from "./pages/HomePage";
 import { TablesPage } from "./pages/ReferencePage";
 import type { CastInfo, CastSubmitPayload } from "./types/cast";
 import type { PageKey } from "./types/navigation";
+import { AppTourProvider } from "./tour/tourProvider";
 
 export type SimpleInfo = ReactNode | string | null;
 
@@ -34,6 +35,7 @@ function App() {
   const [useYaoPosition, setUseYaoPosition] = useState<number | null>(null);
   const [yaoPositionCategory, setYaoPositionCategory] =
     useState<YaoPositionCategory>(DEFAULT_YAO_POSITION_CATEGORY);
+
   const snapshot = useMemo(
     () =>
       chart ? chart.toSnapshot(useYaoPosition, yaoPositionCategory) : null,
@@ -196,54 +198,56 @@ function App() {
 
   return (
     <div className={"app"}>
-      <main className="app-main">
-        {activeKey === "home" && <HomePage onCast={openCastPopup} />}
-        {activeKey === "divine" && (
-          <DivinePage
-            snapshot={snapshot}
-            onCast={openCastPopup}
-            onSave={saveCurrent}
-            onRename={renameCurrent}
-            onEditRemark={editCurrentRemark}
-            onInspect={setSelectedYao}
-            onSimpleInfo={setSimpleInfo}
-            onUseYao={setUseYaoPosition}
-            yaoPositionCategory={yaoPositionCategory}
-            onYaoPositionCategoryChange={setYaoPositionCategory}
-          />
-        )}
-        {activeKey === "archive" && (
-          <ArchivePage
-            archive={archive}
-            onPreview={setArchivePreview}
-            onLoad={loadArchive}
-            onEdit={setArchiveEdit}
-            onDelete={deleteArchive}
-            onSave={saveSnapshot}
-          />
-        )}
-        {activeKey === "tables" && <TablesPage />}
-      </main>
+      <AppTourProvider>
+        <main className="app-main">
+          {activeKey === "home" && <HomePage onCast={openCastPopup} />}
+          {activeKey === "divine" && (
+            <DivinePage
+              snapshot={snapshot}
+              onCast={openCastPopup}
+              onSave={saveCurrent}
+              onRename={renameCurrent}
+              onEditRemark={editCurrentRemark}
+              onInspect={setSelectedYao}
+              onSimpleInfo={setSimpleInfo}
+              onUseYao={setUseYaoPosition}
+              yaoPositionCategory={yaoPositionCategory}
+              onYaoPositionCategoryChange={setYaoPositionCategory}
+            />
+          )}
+          {activeKey === "archive" && (
+            <ArchivePage
+              archive={archive}
+              onPreview={setArchivePreview}
+              onLoad={loadArchive}
+              onEdit={setArchiveEdit}
+              onDelete={deleteArchive}
+              onSave={saveSnapshot}
+            />
+          )}
+          {activeKey === "tables" && <TablesPage />}
+        </main>
 
-      <BottomNav activeKey={activeKey} onChange={setActiveKey} />
-      <CastPopup
-        visible={castVisible}
-        onClose={closeCastPopup}
-        onAutoCast={castRandom}
-        onManualCast={castManual}
-      />
-      <YaoDrawer yao={selectedYao} onClose={() => setSelectedYao(null)} />
-      <InfoDrawer info={simpleInfo} onClose={() => setSimpleInfo(null)} />
-      <ArchiveModal
-        item={archivePreview}
-        onClose={() => setArchivePreview(null)}
-        onLoad={loadArchive}
-      />
-      <ArchiveEditModal
-        item={archiveEdit}
-        onClose={() => setArchiveEdit(null)}
-        onSave={updateArchive}
-      />
+        <BottomNav activeKey={activeKey} onChange={setActiveKey} />
+        <CastPopup
+          visible={castVisible}
+          onClose={closeCastPopup}
+          onAutoCast={castRandom}
+          onManualCast={castManual}
+        />
+        <YaoDrawer yao={selectedYao} onClose={() => setSelectedYao(null)} />
+        <InfoDrawer info={simpleInfo} onClose={() => setSimpleInfo(null)} />
+        <ArchiveModal
+          item={archivePreview}
+          onClose={() => setArchivePreview(null)}
+          onLoad={loadArchive}
+        />
+        <ArchiveEditModal
+          item={archiveEdit}
+          onClose={() => setArchiveEdit(null)}
+          onSave={updateArchive}
+        />
+      </AppTourProvider>
     </div>
   );
 }
