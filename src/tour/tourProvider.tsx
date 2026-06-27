@@ -14,7 +14,7 @@ import { appTourSteps } from "./tour.config";
 type AppTourContextValue = {
   startTour: () => void;
   closeTour: () => void;
-  registerTarget: (key: string) => (node: HTMLElement | null) => void;
+  registerTarget: (key?: string) => (node: HTMLElement | null) => void;
 };
 
 const AppTourContext = createContext<AppTourContextValue | null>(null);
@@ -28,7 +28,8 @@ export function AppTourProvider({ children }: PropsWithChildren) {
   const [open, setOpen] = useState(false);
   const [current, setCurrent] = useState(0);
 
-  const registerTarget = useCallback((key: string) => {
+  const registerTarget = useCallback((key?: string) => {
+    if (!key) return () => {};
     if (!refCallbackMapRef.current[key]) {
       refCallbackMapRef.current[key] = (node: HTMLElement | null) => {
         if (node) {

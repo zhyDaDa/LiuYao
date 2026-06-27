@@ -1,6 +1,7 @@
 import { TapButton } from "../components/TapButton";
 import { Typography } from "antd";
 import { useAppTour } from "../tour/tourProvider";
+import { Help } from "../icons/Icons";
 
 const { Paragraph, Title, Text, Link } = Typography;
 
@@ -43,7 +44,12 @@ export function HomePage({ onCast }: { onCast: () => void }) {
             </TapButton>
           </span>
           <TapButton color="secondary" onTap={startTour}>
-            使用引导
+            <span
+              style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
+            >
+              {Help}
+              使用引导
+            </span>
           </TapButton>
         </div>
       </div>
