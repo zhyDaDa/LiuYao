@@ -167,8 +167,13 @@ function GuaLineCell({
           {changed ? yao.changedElement : yao.element}
         </b>
         <Flex className="tags lower" justify="space-between">
-          {/* <span>123</span>
-          <span>456</span> */}
+          {!changed && yao.hiddenSpirit && (
+            <span className="hidden-spirit">
+              伏：{yao.hiddenSpirit.relative}
+              {yao.hiddenSpirit.branch}
+              {yao.hiddenSpirit.element}
+            </span>
+          )}
         </Flex>
         <Flex></Flex>
       </span>

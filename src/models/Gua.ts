@@ -235,6 +235,12 @@ function decode(code: string): LiuYaoChartCode {
   };
 }
 
+export interface HiddenSpirit {
+  branch: BranchName;
+  element: ElementName;
+  relative: RelativeName;
+}
+
 export interface YaoSnapshot {
   position: number;
   name: string;
@@ -255,6 +261,11 @@ export interface YaoSnapshot {
   strengthLabel: StrengthLabel;
   useSpiritRole: UseSpiritRole;
   traces: RuleTrace[];
+  /**
+   * 伏神：本卦与变爻（以本宫论六亲）皆缺失某六亲时，
+   * 从本宫首卦（八纯卦）同爻位取出的潜伏六亲。无则为 null。
+   */
+  hiddenSpirit: HiddenSpirit | null;
 }
 
 export interface ChartSnapshot {
@@ -471,6 +482,13 @@ export class LiuYaoChart {
     const changedWorld = this.getWorldAndPalace(changedYaos);
     const branches = this.getBranches(originalTrigrams);
     const changedBranches = this.getBranches(changedTrigrams);
+    const hiddenSpirits = getHiddenSpirits(
+      world.palace,
+      world.palaceElement,
+      this.yaos,
+      branches,
+      changedBranches,
+    );
     const calendar = this.getCalendar();
     const spirits = this.getSixSpirits(calendar.day[0]);
     const monthBranch = getGanZhiBranch(calendar.month);
@@ -562,6 +580,7 @@ export class LiuYaoChart {
         strengthLabel: strength >= 2 ? "旺" : strength <= -2 ? "衰" : "平",
         useSpiritRole: "",
         traces,
+        hiddenSpirit: hiddenSpirits.get(yao.position) ?? null,
       };
     });
     const useYao = yaos.find((yao) => yao.position === useYaoPosition);
@@ -707,6 +726,54 @@ function getRelative(
   if (FIVE_ELEMENT_GENERATES[palaceElement] === yaoElement) return "子孙";
   if (FIVE_ELEMENT_CONTROLS[yaoElement] === palaceElement) return "官鬼";
   return "妻财";
+}
+
+/**
+ * 寻伏神：当某六亲在本卦六爻、以及动爻所化的变爻中（皆以本宫论六亲）
+ * 都不出现时，到本宫首卦（八纯卦）中按爻位取出该六亲作为伏神，
+ * 伏于本卦同爻位之下。返回「爻位 → 伏神」映射。
+ *
+ * 依《增删卜易》引《黄金策》「飞爻变爻，俱无用神者，始寻伏神」，
+ * 故本卦或变爻已现的六亲不再补伏神。
+ */
+function getHiddenSpirits(
+  palace: TrigramName,
+  palaceElement: ElementName,
+  yaos: Yao[],
+  branches: BranchName[],
+  changedBranches: BranchName[],
+): Map<number, HiddenSpirit> {
+  // 统计本卦六爻 + 动爻所化变爻已经出现的六亲（皆以本宫为「我」）
+  const present = new Set<RelativeName>();
+  yaos.forEach((yao) => {
+    present.add(
+      getRelative(palaceElement, branch2Element(branches[yao.position])),
+    );
+    if (yao.isMoving) {
+      present.add(
+        getRelative(
+          palaceElement,
+          branch2Element(changedBranches[yao.position]),
+        ),
+      );
+    }
+  });
+
+  // 本宫首卦（八纯卦）：上下卦皆为本宫，按纳甲取六爻地支
+  const pureBranches = [
+    ...NA_JIA[palace].slice(0, 3),
+    ...NA_JIA[palace].slice(3, 6),
+  ];
+
+  const hidden = new Map<number, HiddenSpirit>();
+  pureBranches.forEach((branch, position) => {
+    const element = branch2Element(branch);
+    const relative = getRelative(palaceElement, element);
+    if (!present.has(relative)) {
+      hidden.set(position, { branch, element, relative });
+    }
+  });
+  return hidden;
 }
 
 function getUseSpiritRole(

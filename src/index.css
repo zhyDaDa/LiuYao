@@ -472,6 +472,10 @@ h2 {
 .gua-text .tags span {
   padding: 1px 2px;
   border-radius: 2px;
+  text-wrap: none;
+  white-space: nowrap;
+  font-size: 0.6rem !important;
+  line-height: 0.6rem;
 }
 .gua-text .tags span.month {
   color: white;
@@ -484,6 +488,15 @@ h2 {
 .gua-text .tags span.day {
   color: white;
   background-color: var(--amber);
+}
+.gua-text .tags.lower {
+  display: flex;
+  justify-content: center;
+}
+.gua-text .tags span.hidden-spirit {
+  color: white;
+  background-color: #6b5b95;
+  letter-spacing: 0.02em;
 }
 
 .gua-text.is-use-role::before {
