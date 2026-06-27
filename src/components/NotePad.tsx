@@ -1,6 +1,7 @@
 import { Typography } from "antd";
 import type { ChartSnapshot } from "../models/Gua";
 import { useRef, useState } from "react";
+import { useAppTour } from "../tour/tourProvider";
 
 export const NotePad = ({
   snapshot,
@@ -9,10 +10,11 @@ export const NotePad = ({
   snapshot: ChartSnapshot;
   onEditRemark: (remark: string) => void;
 }) => {
+  const { registerTarget } = useAppTour();
   const [remark, setRemark] = useState(snapshot.remark);
   const remarkRef = useRef(snapshot.remark);
   return (
-    <div className="notepad-wrapper">
+    <div className="notepad-wrapper" ref={registerTarget("divine-notepad")}>
       <Typography.Paragraph
         copyable
         editable={{

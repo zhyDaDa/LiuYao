@@ -10,15 +10,25 @@ import {
 import { BranchCycleTable } from "./BranchCycleTable";
 import { FullScreen, OffScreen } from "../icons/Icons";
 import { TapButton } from "./TapButton";
+import { useAppTour } from "../tour/tourProvider";
 import styles from "./DrawingPanel.module.css";
 
 const BRUSH_SIZE = 4;
-const BRUSH_COLORS = ["#b94335", "#151311", "#317a56", "#a36a1d"];
+const COMMON_COLORS = [
+  "#B94335",
+  "#A36A1D",
+  "#B89A3C",
+  "#317A56",
+  "#2D7A6B",
+  "#2B5D80",
+  "#7B3F8A",
+  "#151311",
+];
 const DRAWING_PANEL_STORAGE_KEY = "liuyao:drawing-panel-image";
 const BRUSH_COLOR_PRESETS: Required<ColorPickerProps>["presets"] = [
   {
     label: "常用",
-    colors: BRUSH_COLORS,
+    colors: COMMON_COLORS,
     key: "brush",
   },
 ];
@@ -29,11 +39,12 @@ interface DrawingPanelProps {
 }
 
 export function DrawingPanel({ expanded, onToggle }: DrawingPanelProps) {
+  const { registerTarget } = useAppTour();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const savedCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const hasDrawingRef = useRef(false);
   const lastPointRef = useRef<{ x: number; y: number } | null>(null);
-  const [brushColor, setBrushColor] = useState(BRUSH_COLORS[0]);
+  const [brushColor, setBrushColor] = useState(COMMON_COLORS[0]);
   const [branchLookupOpen, setBranchLookupOpen] = useState(false);
 
   useEffect(() => {
@@ -283,6 +294,7 @@ export function DrawingPanel({ expanded, onToggle }: DrawingPanelProps) {
           expanded ? styles.controlsExpanded : "",
         ].join(" ")}
         onContextMenu={(event) => event.preventDefault()}
+        ref={registerTarget("divine-drawing")}
       >
         <TapButton
           className={styles.toggleButton}

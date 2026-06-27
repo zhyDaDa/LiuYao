@@ -117,6 +117,24 @@ h2 {
   color: var(--muted);
 }
 
+.title-help-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 6px;
+  padding: 2px;
+  border: none;
+  border-radius: 50%;
+  color: var(--muted);
+  background: transparent;
+  cursor: pointer;
+}
+
+.title-help-button:active {
+  color: var(--ink);
+}
+
 .eyebrow {
   display: inline-flex;
   color: var(--red);

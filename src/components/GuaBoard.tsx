@@ -3,6 +3,7 @@ import type { CSSProperties } from "react";
 import type { ChartSnapshot, YaoSnapshot } from "../models/Gua";
 import { Flex } from "antd";
 import { compareYaoForSKCH } from "../utils/SKCH";
+import { useAppTour } from "../tour/tourProvider";
 
 export function GuaBoard({
   snapshot,
@@ -13,10 +14,15 @@ export function GuaBoard({
   onInspect: (yao: YaoSnapshot) => void;
   onUseYao: (position: number | null) => void;
 }) {
+  const { registerTarget } = useAppTour();
   const useYaoPosition = snapshot.useYaoPosition ?? null;
   return (
     <div className="chart-body">
-      <div className="chart-board" aria-label="六爻排盘">
+      <div
+        className="chart-board"
+        aria-label="六爻排盘"
+        ref={registerTarget("divine-board")}
+      >
         <div className="board-head">
           <span>六神</span>
           <span>本卦</span>

@@ -2,6 +2,7 @@ import { DatePicker, Input, Switch } from "antd-mobile";
 import { useEffect } from "react";
 import type { CastInfo } from "../types/cast";
 import { TapButton } from "./TapButton";
+import { useAppTour } from "../tour/tourProvider";
 import styles from "./CastPopup.module.css";
 
 interface CastBasicInfoProps {
@@ -17,6 +18,8 @@ export function CastBasicInfo({
   onInfoChange,
   onUseCurrentTimeChange,
 }: CastBasicInfoProps) {
+  const { registerTarget } = useAppTour();
+
   useEffect(() => {
     if (!useCurrentTime) return;
 
@@ -39,7 +42,7 @@ export function CastBasicInfo({
     <section className={styles.section}>
       <div className={styles.sectionTitle}>基本信息</div>
       <div className={styles.fieldList}>
-        <label className={styles.fieldRow}>
+        <label className={styles.fieldRow} ref={registerTarget("theme")}>
           <span>占事主题</span>
           <Input
             value={info.question}
@@ -49,45 +52,47 @@ export function CastBasicInfo({
           />
         </label>
 
-        <div className={styles.timeSwitchRow}>
-          <span>使用当前时间</span>
-          <Switch
-            checked={useCurrentTime}
-            onChange={(checked) => {
-              onUseCurrentTimeChange(checked);
-              if (checked) {
-                updateCastAt(new Date());
-              }
-            }}
-          />
-        </div>
-
-        <DatePicker
-          precision="minute"
-          value={info.castAt}
-          onConfirm={updateCastAt}
-        >
-          {(_, actions) => (
-            <button
-              type="button"
-              className={styles.timeButton}
-              disabled={useCurrentTime}
-              onClick={() => {
-                if (!useCurrentTime) {
-                  actions.open();
+        <div className={styles.timeGroup} ref={registerTarget("time")}>
+          <div className={styles.timeSwitchRow}>
+            <span>使用当前时间</span>
+            <Switch
+              checked={useCurrentTime}
+              onChange={(checked) => {
+                onUseCurrentTimeChange(checked);
+                if (checked) {
+                  updateCastAt(new Date());
                 }
               }}
-            >
-              <span>起卦时间</span>
-              <strong>{formatCastTime(info.castAt)}</strong>
-            </button>
+            />
+          </div>
+
+          <DatePicker
+            precision="minute"
+            value={info.castAt}
+            onConfirm={updateCastAt}
+          >
+            {(_, actions) => (
+              <button
+                type="button"
+                className={styles.timeButton}
+                disabled={useCurrentTime}
+                onClick={() => {
+                  if (!useCurrentTime) {
+                    actions.open();
+                  }
+                }}
+              >
+                <span>起卦时间</span>
+                <strong>{formatCastTime(info.castAt)}</strong>
+              </button>
+            )}
+          </DatePicker>
+          {!useCurrentTime && (
+            <TapButton fill="outline" onTap={() => updateCastAt(new Date())}>
+              填入当前时间
+            </TapButton>
           )}
-        </DatePicker>
-        {!useCurrentTime && (
-          <TapButton fill="outline" onTap={() => updateCastAt(new Date())}>
-            填入当前时间
-          </TapButton>
-        )}
+        </div>
       </div>
     </section>
   );

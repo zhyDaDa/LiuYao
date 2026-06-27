@@ -9,10 +9,10 @@ import {
 } from "react";
 import { Tour } from "antd";
 import type { TourProps, TourStepProps } from "antd";
-import { appTourSteps } from "./tour.config";
+import { appTourGroups, type TourId } from "./tour.config";
 
 type AppTourContextValue = {
-  startTour: () => void;
+  startTour: (tourId: TourId) => void;
   closeTour: () => void;
   registerTarget: (key?: string) => (node: HTMLElement | null) => void;
 };
@@ -27,6 +27,7 @@ export function AppTourProvider({ children }: PropsWithChildren) {
 
   const [open, setOpen] = useState(false);
   const [current, setCurrent] = useState(0);
+  const [activeTourId, setActiveTourId] = useState<TourId | null>(null);
 
   const registerTarget = useCallback((key?: string) => {
     if (!key) return () => {};
@@ -44,15 +45,17 @@ export function AppTourProvider({ children }: PropsWithChildren) {
   }, []);
 
   const steps: TourProps["steps"] = useMemo(() => {
-    return appTourSteps.map(({ key, ...step }) => ({
+    if (!activeTourId) return [];
+    return appTourGroups[activeTourId].map(({ key, ...step }) => ({
       ...step,
       target: (() => {
         return targetMapRef.current[key] ?? null;
       }) as TourStepProps["target"],
     }));
-  }, []);
+  }, [activeTourId]);
 
-  const startTour = useCallback(() => {
+  const startTour = useCallback((tourId: TourId) => {
+    setActiveTourId(tourId);
     setCurrent(0);
     setOpen(true);
   }, []);
@@ -83,6 +86,11 @@ export function AppTourProvider({ children }: PropsWithChildren) {
         scrollIntoViewOptions={{
           block: "center",
           behavior: "smooth",
+        }}
+        styles={{
+          section:{
+            maxWidth: "90vw",
+          }
         }}
       />
     </AppTourContext.Provider>

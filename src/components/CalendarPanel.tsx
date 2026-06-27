@@ -3,6 +3,7 @@ import type { SimpleInfo } from "../App";
 import type { ChartSnapshot } from "../models/Gua";
 import { TwelveLifeStages } from "./TwelveLifeStages";
 import { specialGuaChangeKnowledges } from "../models/RuleKnowledge";
+import { useAppTour } from "../tour/tourProvider";
 
 export function CalendarPanel({
   snapshot,
@@ -11,6 +12,7 @@ export function CalendarPanel({
   snapshot: ChartSnapshot;
   onSimpleInfo: (info: SimpleInfo) => void;
 }) {
+  const { registerTarget } = useAppTour();
   const selectedUseYao = snapshot.yaos.find(
     (yao) => yao.position === snapshot.useYaoPosition,
   );
@@ -42,7 +44,7 @@ export function CalendarPanel({
 
   return (
     <div className="chart-side">
-      <div className="calendar-band">
+      <div className="calendar-band" ref={registerTarget("divine-calendar")}>
         <div>
           <strong>{snapshot.calendar.year}</strong>
           <span>年</span>
@@ -67,6 +69,7 @@ export function CalendarPanel({
         type="button"
         className="gua-summary"
         onClick={handleGuaSummaryInfo}
+        ref={registerTarget("divine-summary")}
       >
         <div>
           <span>本卦</span>

@@ -43,7 +43,7 @@ export function HomePage({ onCast }: { onCast: () => void }) {
               起一卦
             </TapButton>
           </span>
-          <TapButton color="secondary" onTap={startTour}>
+          <TapButton color="secondary" onTap={() => startTour("page-basic")}>
             <span
               style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
             >
