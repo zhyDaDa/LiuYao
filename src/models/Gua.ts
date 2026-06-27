@@ -318,7 +318,7 @@ const NA_JIA: Record<TrigramName, BranchName[]> = {
   离: ["卯", "丑", "亥", "酉", "未", "巳"],
   兑: ["巳", "卯", "丑", "亥", "酉", "未"],
 };
-const GUA_NAMES: Record<string, string> = {
+export const GUA_NAMES: Record<string, string> = {
   乾乾: "乾为天",
   坤坤: "坤为地",
   坎震: "水雷屯",

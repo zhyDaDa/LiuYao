@@ -1,4 +1,5 @@
 import { BranchCycleTable } from "../components/BranchCycleTable";
+import { GuaDict } from "../components/GuaDict";
 import { LookupCard } from "../components/LookupCard";
 import {
   RELATIVE_CHANGE_FEATURE_ROWS,
@@ -19,6 +20,7 @@ export function TablesPage() {
         <h1>基础规则</h1>
       </div>
       <BranchCycleTable />
+      <GuaDict />
       <div className="lookup-grid">
         <LookupCard title="已启用规则集" rows={enabledRuleExplanations} />
         <LookupCard title="地支五行" rows={["亥子：水", "寅卯：木", "巳午：火", "申酉：金", "辰戌丑未：土"]} />
