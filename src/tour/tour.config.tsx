@@ -103,9 +103,15 @@ export const appTourGroups = {
       description: "这里是完整的排盘界面, 下面逐一介绍几个主要板块",
     },
     {
+      key: "divine-title-actions",
+      title: "题目操作",
+      description: "在占事题目右侧可以重新起卦, 或将当前排盘存档",
+      placement: "bottom",
+    },
+    {
       key: "divine-actions",
-      title: "操作栏",
-      description: "重新起卦、把当前卦象存档, 以及切换本卦范畴(取象建议)",
+      title: "本卦范畴",
+      description: "切换本卦范畴, 系统会根据不同占事类别给出取象建议",
       placement: "bottom",
     },
     {
@@ -150,6 +156,19 @@ export const appTourGroups = {
       key: "divine-notepad",
       title: "备注",
       description: "记录断卦思路与心得, 点击铅笔编辑, 内容会随存档一起保存",
+      placement: "top",
+    },
+    {
+      key: "divine-ai-analysis",
+      title: "AI 分析",
+      description: (
+        <>
+          <Paragraph>配置 API 后, 可一键让 AI 基于当前排盘生成分析</Paragraph>
+          <Paragraph type="secondary">
+            也可先复制上下文, 再粘贴到自己喜欢的大模型中使用
+          </Paragraph>
+        </>
+      ),
       placement: "top",
     },
     {

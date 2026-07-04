@@ -8,6 +8,8 @@ import type { ChartSnapshot, YaoSnapshot } from "../models/Gua";
 import type { YaoPositionCategory } from "../models/YaoPositionImages";
 import { YAO_POSITION_CATEGORY_OPTIONS } from "../models/YaoPositionImages";
 import { NotePad } from "../components/NotePad";
+import { AiAnalysisSection } from "../components/AiAnalysisSection";
+import type { AiConfig } from "../models/AiConfig";
 import type { SimpleInfo } from "../App";
 import { Help } from "../icons/Icons";
 import { useAppTour } from "../tour/tourProvider";
@@ -24,6 +26,8 @@ function titleLengthClass(question: string): string {
 
 export function DivinePage({
   snapshot,
+  aiConfig,
+  onAiConfigChange,
   onCast,
   onSave,
   onRename,
@@ -35,6 +39,8 @@ export function DivinePage({
   onYaoPositionCategoryChange,
 }: {
   snapshot: ChartSnapshot | null;
+  aiConfig: AiConfig | null;
+  onAiConfigChange: (config: AiConfig) => void;
   onCast: () => void;
   onSave: () => void;
   onRename: (name: string) => void;
@@ -100,14 +106,16 @@ export function DivinePage({
               {snapshot.question}
             </Paragraph>
           </div>
-          <Space className="chart-title-actions">
-            <TapButton color="primary" onTap={onCast}>
-              重新起卦
-            </TapButton>
-            <TapButton fill="outline" onTap={onSave}>
-              存档
-            </TapButton>
-          </Space>
+          <div ref={registerTarget("divine-title-actions")}>
+            <Space className="chart-title-actions">
+              <TapButton color="primary" onTap={onCast}>
+                重新起卦
+              </TapButton>
+              <TapButton fill="outline" onTap={onSave}>
+                存档
+              </TapButton>
+            </Space>
+          </div>
         </Flex>
       </div>
       <div className="action-strip" ref={registerTarget("divine-actions")}>
@@ -138,6 +146,13 @@ export function DivinePage({
         expanded={expanded}
       />
       <NotePad snapshot={snapshot} onEditRemark={onEditRemark} />
+      <div ref={registerTarget("divine-ai-analysis")}>
+        <AiAnalysisSection
+          snapshot={snapshot}
+          aiConfig={aiConfig}
+          onAiConfigChange={onAiConfigChange}
+        />
+      </div>
       <DrawingPanel
         expanded={expanded}
         onToggle={() => setExpanded(!expanded)}

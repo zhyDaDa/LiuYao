@@ -7,6 +7,7 @@ import { BottomNav } from "./components/BottomNav";
 import { CastPopup } from "./components/CastPopup";
 import { InfoDrawer, YaoDrawer } from "./components/YaoDrawer";
 import { readArchive, writeArchive } from "./models/Archive";
+import { readAiConfig, writeAiConfig, type AiConfig } from "./models/AiConfig";
 import type { ChartSnapshot, YaoSnapshot } from "./models/Gua";
 import { LiuYaoChart, Yao, clampQuestionLength } from "./models/Gua";
 import type { YaoPositionCategory } from "./models/YaoPositionImages";
@@ -25,6 +26,7 @@ function App() {
   const [activeKey, setActiveKey] = useState<PageKey>("home");
   const [chart, setChart] = useState<LiuYaoChart | null>(null);
   const [archive, setArchive] = useState<ChartSnapshot[]>(readArchive);
+  const [aiConfig, setAiConfig] = useState<AiConfig | null>(readAiConfig);
   const [selectedYao, setSelectedYao] = useState<YaoSnapshot | null>(null);
   const [simpleInfo, setSimpleInfo] = useState<SimpleInfo>(null);
   const [archivePreview, setArchivePreview] = useState<ChartSnapshot | null>(
@@ -160,6 +162,11 @@ function App() {
     Toast.show({ content: "已读档到排盘页" });
   }
 
+  function updateAiConfig(config: AiConfig) {
+    setAiConfig(config);
+    writeAiConfig(config);
+  }
+
   function updateArchive(item: ChartSnapshot) {
     const nextArchive = archive.map((archiveItem) =>
       archiveItem.id === item.id ? item : archiveItem,
@@ -204,6 +211,8 @@ function App() {
           {activeKey === "divine" && (
             <DivinePage
               snapshot={snapshot}
+              aiConfig={aiConfig}
+              onAiConfigChange={updateAiConfig}
               onCast={openCastPopup}
               onSave={saveCurrent}
               onRename={renameCurrent}

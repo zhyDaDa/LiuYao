@@ -1,6 +1,6 @@
 import type { CalendarInfo } from "./Calendar";
 import { LiuYaoTime } from "./Calendar";
-import type { RuleTrace, RuleYaoContext } from "./Rules";
+import type { RuleActor, RuleTrace, RuleYaoContext } from "./Rules";
 import { evaluateRulePipeline, isTraceTargetingYao } from "./Rules";
 import type { YaoPositionCategory } from "./YaoPositionImages";
 import type {
@@ -10,6 +10,7 @@ import type {
   GuaSpecialType,
   RelativeName,
   SixSpiritName,
+  SKCHEffect,
   StrengthLabel,
   TrigramName,
   UseSpiritRole,
@@ -27,6 +28,7 @@ import {
   YOU_HUN_GUA_NAMES,
 } from "../types/basicTerms";
 import { branch2Element } from "../utils/branch2Element";
+import { compareYaoForSKCH } from "../utils/SKCH";
 import { createId } from "../utils/createId";
 
 const CODE_KEY = "liuyao@zhyDaDa";
@@ -266,6 +268,18 @@ export interface YaoSnapshot {
    * 从本宫首卦（八纯卦）同爻位取出的潜伏六亲。无则为 null。
    */
   hiddenSpirit: HiddenSpirit | null;
+  /**
+   * 月支对本爻的作用：生、克、冲、合、无。
+   */
+  monthEffect: SKCHEffect;
+  /**
+   * 日支对本爻的作用：生、克、冲、合、无。
+   */
+  dayEffect: SKCHEffect;
+  /**
+   * 该爻是否落在日旬空内。
+   */
+  isVoid: boolean;
 }
 
 export interface ChartSnapshot {
@@ -587,6 +601,9 @@ export class LiuYaoChart {
         useSpiritRole: "",
         traces,
         hiddenSpirit: hiddenSpirits.get(yao.position) ?? null,
+        monthEffect: compareYaoForSKCH(monthBranch, branch),
+        dayEffect: compareYaoForSKCH(dayBranch, branch),
+        isVoid: calendar.voidBranches.includes(branch),
       };
     });
     const useYao = yaos.find((yao) => yao.position === useYaoPosition);
@@ -721,6 +738,74 @@ export class LiuYaoChart {
   static importFromText(text: string): LiuYaoChart {
     throw new Error(`TODO: 此功能尚待开发 ///-_-💧, 你的输入是:${text}`);
   }
+
+  toPromptContext(): string {
+    const snapshot = this.toSnapshot();
+
+    const worldYao = snapshot.yaos.find((yao) => yao.role === "世");
+    const respondYao = snapshot.yaos.find((yao) => yao.role === "应");
+
+    const originalTypeText = snapshot.originalType
+      ? `，${snapshot.originalType}`
+      : "";
+    const changedTypeText = snapshot.changedType
+      ? `，${snapshot.changedType}`
+      : "";
+
+    const headerParts: string[] = [
+      `占事：${snapshot.question}`,
+      `占时：${snapshot.calendar.year}年${snapshot.calendar.month}月${snapshot.calendar.day}日${snapshot.calendar.hour}时`,
+      `日旬空：${snapshot.calendar.voidBranches.join("、")}`,
+      `本卦${snapshot.originalName}（${snapshot.palace}宫${snapshot.palaceElement}${originalTypeText}）`,
+    ];
+
+    if (worldYao) {
+      headerParts.push(`${worldYao.name}持世`);
+    }
+    if (respondYao) {
+      headerParts.push(`${respondYao.name}为应`);
+    }
+
+    headerParts.push(
+      `变卦${snapshot.changedName}（${snapshot.changedPalace}宫${snapshot.changedPalaceElement}${changedTypeText}）`,
+    );
+
+    const yaoDescriptions = snapshot.yaos.map((yao) =>
+      formatYaoForPrompt(yao, snapshot.calendar.dayLifeStages[yao.element]),
+    );
+
+    const hiddenSpirits = snapshot.yaos
+      .filter((yao) => yao.hiddenSpirit)
+      .map(
+        (yao) =>
+          `${yao.name}下伏${yao.hiddenSpirit!.relative}${yao.hiddenSpirit!.branch}${yao.hiddenSpirit!.element}`,
+      );
+
+    const contextParts: string[] = [...headerParts, yaoDescriptions.join("；")];
+
+    if (hiddenSpirits.length > 0) {
+      contextParts.push(`伏神：${hiddenSpirits.join("，")}`);
+    }
+
+    const worldRelationText = formatWorldYaoRelations(snapshot);
+    if (worldRelationText) {
+      contextParts.push(worldRelationText);
+    }
+
+    const sanHeText = formatSanHeRelations(snapshot);
+    if (sanHeText) {
+      contextParts.push(sanHeText);
+    }
+
+    return (
+      contextParts.join("。") +
+      "\n\n请严格按以下要求输出：" +
+      "1. 不要使用任何 Markdown 格式（不要有 #、*、-、列表、代码块、表格等）；" +
+      "2. 只输出两段文本：第一段说明你的推断过程，第二段给出断语；" +
+      "3. 不要输出任何与推断无关的内容，不要解释性废话、不要建议、不要参考性描述、不要对占事类别作假设、不要免责声明；" +
+      "4. 基于上述排盘事实进行推理，逻辑链必须清晰、每一步都给出明确依据。"
+    );
+  }
 }
 
 function getRelative(
@@ -838,6 +923,191 @@ function toBit(yao: Yao) {
 
 function getGanZhiBranch(ganZhi: GanZhiName): BranchName {
   return ganZhi[1] as BranchName;
+}
+
+function formatYaoForPrompt(
+  yao: YaoSnapshot,
+  lifeStage: string,
+): string {
+  let text = `${yao.name}${yao.relative}${yao.branch}${yao.element}`;
+
+  if (yao.role === "世") {
+    text += "持世";
+  } else if (yao.role === "应") {
+    text += "为应";
+  }
+
+  text += `临${yao.spirit}${getYaoYinYangState(yao)}`;
+
+  const extras: string[] = [];
+
+  if (yao.isDarkMoving) {
+    extras.push(
+      `暗动，变卦为${yao.changedRelative}${yao.changedBranch}${yao.changedElement}`,
+    );
+  }
+
+  if (yao.isMoving) {
+    extras.push(
+      `化${yao.changedRelative}${yao.changedBranch}${yao.changedElement}`,
+    );
+  }
+
+  if (yao.monthEffect !== "无") {
+    extras.push(`月${yao.monthEffect}`);
+  }
+
+  if (yao.dayEffect !== "无") {
+    extras.push(`日${yao.dayEffect}`);
+  }
+
+  if (yao.isVoid) {
+    extras.push("旬空");
+  }
+
+  if (lifeStage) {
+    extras.push(`日${lifeStage}`);
+  }
+
+  if (yao.strengthLabel) {
+    extras.push(`${yao.strengthLabel}相`);
+  }
+
+  if (yao.useSpiritRole) {
+    extras.push(`为${yao.useSpiritRole}神`);
+  }
+
+  if (extras.length > 0) {
+    text += `，${extras.join("，")}`;
+  }
+
+  return text;
+}
+
+function getYaoYinYangState(yao: YaoSnapshot): string {
+  if (yao.isMoving) {
+    return yao.isYang ? "老阳发动" : "老阴发动";
+  }
+  return yao.isYang ? "少阳" : "少阴";
+}
+
+function formatWorldYaoRelations(snapshot: ChartSnapshot): string {
+  const worldYao = snapshot.yaos.find((yao) => yao.role === "世");
+  if (!worldYao) {
+    return "";
+  }
+
+  const worldPosition = worldYao.position;
+  const facts = getUniqueTraces(snapshot.yaos.flatMap((yao) => yao.traces))
+    .filter(
+      (trace) =>
+        isTraceRelatedToYao(trace, worldPosition) ||
+        isTraceFromYao(trace, worldPosition),
+    )
+    .map((trace) => formatTraceFact(trace))
+    .filter(Boolean);
+
+  if (facts.length === 0) {
+    return "";
+  }
+
+  return `世爻关系：${facts.join("；")}`;
+}
+
+function formatSanHeRelations(snapshot: ChartSnapshot): string {
+  const facts = getUniqueTraces(snapshot.yaos.flatMap((yao) => yao.traces))
+    .filter((trace) => trace.effect === "三合局")
+    .map((trace) => formatTraceFact(trace))
+    .filter(Boolean);
+
+  if (facts.length === 0) {
+    return "";
+  }
+
+  return `三合局：${facts.join("；")}`;
+}
+
+function formatTraceFact(trace: RuleTrace): string {
+  const sources = normalizeActors(trace.source);
+  const targets = normalizeActors(trace.target);
+
+  if (trace.effect === "三合局") {
+    const branches = sources
+      .map((actor) => actor.be_pair?.branch ?? actor.label)
+      .join("、");
+    return `${trace.title}：${branches}`;
+  }
+
+  if (trace.effect === "暗动") {
+    return `${formatActor(targets[0])}受${formatActor(sources[0])}冲起暗动`;
+  }
+
+  if (trace.effect === "进神" || trace.effect === "退神") {
+    return `${formatActor(targets[0])}动化${formatBranchElement(
+      sources[0],
+    )}，为${trace.effect}`;
+  }
+
+  if (["长生", "帝旺", "墓", "绝"].includes(trace.effect)) {
+    const targetElement = targets[0].be_pair?.element ?? "";
+    return `${formatActor(targets[0])}动化${formatBranchElement(
+      sources[0],
+    )}，为${targetElement}之${trace.effect}`;
+  }
+
+  const sourceText = sources.map(formatActor).join("、");
+  const targetText = targets.map(formatActor).join("、");
+
+  if (trace.title.startsWith("回头")) {
+    return `${sourceText}${trace.title}${targetText}`;
+  }
+
+  return `${sourceText}${trace.effect}${targetText}`;
+}
+
+function normalizeActors(actorOrActors: RuleActor | RuleActor[]): RuleActor[] {
+  return Array.isArray(actorOrActors) ? actorOrActors : [actorOrActors];
+}
+
+function formatActor(actor: RuleActor): string {
+  if (actor.be_pair) {
+    return `${actor.label}${actor.be_pair.branch}${actor.be_pair.element}`;
+  }
+  return actor.label;
+}
+
+function formatBranchElement(actor: RuleActor): string {
+  if (actor.be_pair) {
+    return `${actor.be_pair.branch}${actor.be_pair.element}`;
+  }
+  return actor.label;
+}
+
+function getUniqueTraces(traces: RuleTrace[]): RuleTrace[] {
+  return traces.filter(
+    (trace, index, self) =>
+      self.findIndex(
+        (item) => item.title === trace.title && item.reason === trace.reason,
+      ) === index,
+  );
+}
+
+function isTraceRelatedToYao(trace: RuleTrace, position: number): boolean {
+  const targets = Array.isArray(trace.target) ? trace.target : [trace.target];
+  return targets.some(
+    (actor) =>
+      (actor.kind === "yao" || actor.kind === "changedYao") &&
+      actor.position === position,
+  );
+}
+
+function isTraceFromYao(trace: RuleTrace, position: number): boolean {
+  const sources = Array.isArray(trace.source) ? trace.source : [trace.source];
+  return sources.some(
+    (actor) =>
+      (actor.kind === "yao" || actor.kind === "changedYao") &&
+      actor.position === position,
+  );
 }
 
 export const getGuaSpecialType = (guaName: string): GuaSpecialType => {

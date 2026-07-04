@@ -2,7 +2,6 @@ import { useRef } from "react";
 import type { CSSProperties } from "react";
 import type { ChartSnapshot, YaoSnapshot } from "../models/Gua";
 import { Flex } from "antd";
-import { compareYaoForSKCH } from "../utils/SKCH";
 import { useAppTour } from "../tour/tourProvider";
 
 export function GuaBoard({
@@ -33,7 +32,6 @@ export function GuaBoard({
           <YaoRow
             key={yao.position}
             yao={yao}
-            snapshot={snapshot}
             onInspect={onInspect}
             onUseYao={onUseYao}
             isUsed={useYaoPosition === yao.position}
@@ -46,13 +44,11 @@ export function GuaBoard({
 
 function YaoRow({
   yao,
-  snapshot,
   onInspect,
   onUseYao,
   isUsed,
 }: {
   yao: YaoSnapshot;
-  snapshot: ChartSnapshot;
   onInspect: (yao: YaoSnapshot) => void;
   onUseYao: (position: number | null) => void;
   isUsed: boolean;
@@ -98,7 +94,7 @@ function YaoRow({
         .join("\n")}
     >
       <span className="spirit">{yao.spirit}</span>
-      <GuaLineCell yao={yao} snapshot={snapshot} />
+      <GuaLineCell yao={yao} />
       <span
         className={
           yao.isMoving || yao.isDarkMoving ? "move-mark is-moving" : "move-mark"
@@ -106,7 +102,7 @@ function YaoRow({
       >
         {getMoveMark(yao)}
       </span>
-      <GuaLineCell yao={yao} snapshot={snapshot} changed />
+      <GuaLineCell yao={yao} changed />
       <span className="hover-tip">{yao.traces[0]?.reason}</span>
     </button>
   );
@@ -114,11 +110,9 @@ function YaoRow({
 
 function GuaLineCell({
   yao,
-  snapshot,
   changed = false,
 }: {
   yao: YaoSnapshot;
-  snapshot: ChartSnapshot;
   changed?: boolean;
 }) {
   const strengthClass =
@@ -131,13 +125,10 @@ function GuaLineCell({
       ? getUseSpiritMarkClass(yao.useSpiritRole)
       : "";
 
-  // 判断常用信息
-  const monthEffect = compareYaoForSKCH(
-    snapshot.calendar.monthBranch,
-    yao.branch,
-  );
-  const dayEffect = compareYaoForSKCH(snapshot.calendar.dayBranch, yao.branch);
-  const voidEffect = snapshot.calendar.dayVoidBranches.includes(yao.branch);
+  // 常用信息已在 YaoSnapshot 中计算好
+  const monthEffect = yao.monthEffect;
+  const dayEffect = yao.dayEffect;
+  const isVoid = yao.isVoid;
 
   return (
     <span className={`gua-line-cell ${strengthClass} ${useSpiritClass}`}>
@@ -154,7 +145,7 @@ function GuaLineCell({
           ) : (
             <span className="month">月{monthEffect}</span>
           )}
-          {voidEffect && <span className="void">空</span>}
+          {isVoid && <span className="void">空</span>}
           {dayEffect === "无" ? (
             <span />
           ) : (

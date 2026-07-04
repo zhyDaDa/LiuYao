@@ -1,0 +1,68 @@
+.wrapper {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.header {
+  margin-bottom: 10px;
+}
+
+.title {
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.actions {
+  flex-wrap: wrap;
+}
+
+.outputArea {
+  margin-top: 4px;
+}
+
+.reasoningBox {
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+  background: var(--surface-soft);
+}
+
+.reasoningLabel {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.reasoning {
+  display: block;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.output {
+  margin: 0 !important;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  line-height: 1.65;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.spin {
+  margin-left: 6px;
+}
+
+.resultActions {
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
