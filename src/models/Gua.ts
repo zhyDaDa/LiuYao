@@ -406,6 +406,12 @@ export class Yao {
   }
 }
 
+export const MAX_QUESTION_LENGTH = 15;
+
+export function clampQuestionLength(question: string): string {
+  return question.slice(0, MAX_QUESTION_LENGTH);
+}
+
 export class LiuYaoChart {
   public readonly id: string;
   public readonly title: string;
@@ -422,11 +428,11 @@ export class LiuYaoChart {
     remark = "",
   ) {
     this.yaos = yaos;
-    this.question = question;
+    this.question = clampQuestionLength(question.trim());
     this.remark = remark;
     this.createdAt = createdAt;
     this.id = id;
-    this.title = `${question} · ${createdAt.toLocaleDateString("zh-CN")}`;
+    this.title = `${this.question} · ${createdAt.toLocaleDateString("zh-CN")}`;
   }
 
   static random(question = "随机起卦", createdAt = new Date()): LiuYaoChart {

@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import type { CastInfo } from "../types/cast";
 import { TapButton } from "./TapButton";
 import { useAppTour } from "../tour/tourProvider";
+import { MAX_QUESTION_LENGTH } from "../models/Gua";
 import styles from "./CastPopup.module.css";
 
 interface CastBasicInfoProps {
@@ -31,7 +32,10 @@ export function CastBasicInfo({
   }, [onInfoChange, useCurrentTime]);
 
   function updateQuestion(question: string) {
-    onInfoChange({ ...info, question });
+    onInfoChange({
+      ...info,
+      question: question.slice(0, MAX_QUESTION_LENGTH),
+    });
   }
 
   function updateCastAt(castAt: Date) {
@@ -43,11 +47,12 @@ export function CastBasicInfo({
       <div className={styles.sectionTitle}>基本信息</div>
       <div className={styles.fieldList}>
         <label className={styles.fieldRow} ref={registerTarget("theme")}>
-          <span>占事主题</span>
+          <span>占事主题(限15字)</span>
           <Input
             value={info.question}
             placeholder="请输入本次占事主题"
             clearable
+            maxLength={MAX_QUESTION_LENGTH}
             onChange={updateQuestion}
           />
         </label>

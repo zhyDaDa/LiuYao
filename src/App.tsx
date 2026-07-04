@@ -8,7 +8,7 @@ import { CastPopup } from "./components/CastPopup";
 import { InfoDrawer, YaoDrawer } from "./components/YaoDrawer";
 import { readArchive, writeArchive } from "./models/Archive";
 import type { ChartSnapshot, YaoSnapshot } from "./models/Gua";
-import { LiuYaoChart, Yao } from "./models/Gua";
+import { LiuYaoChart, Yao, clampQuestionLength } from "./models/Gua";
 import type { YaoPositionCategory } from "./models/YaoPositionImages";
 import { DEFAULT_YAO_POSITION_CATEGORY } from "./models/YaoPositionImages";
 import { ArchivePage } from "./pages/ArchivePage";
@@ -91,7 +91,7 @@ function App() {
   }
 
   function renameCurrent(nextQuestion: string) {
-    const question = nextQuestion.trim();
+    const question = clampQuestionLength(nextQuestion.trim());
 
     if (!chart) return;
 

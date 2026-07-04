@@ -51,7 +51,7 @@ export const appTourGroups = {
     {
       key: "theme",
       title: "占事主题",
-      description: "占事的主要内容, 言简意赅",
+      description: "占事的主要内容，言简意赅，建议控制在 15 个字以内",
       placement: "right",
     },
     {

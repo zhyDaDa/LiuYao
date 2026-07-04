@@ -8,6 +8,7 @@ import {
   type ArchiveYaoValue,
 } from "../models/Archive";
 import type { ChartSnapshot } from "../models/Gua";
+import { MAX_QUESTION_LENGTH } from "../models/Gua";
 import styles from "./ArchiveEditModal.module.css";
 import { YAO_NAMES } from "../types/basicTerms";
 
@@ -68,11 +69,13 @@ export function ArchiveEditModal({
               <span>排盘名称</span>
               <input
                 value={draft.question}
-                maxLength={40}
-                
+                maxLength={MAX_QUESTION_LENGTH}
                 placeholder="例如：工作选择"
                 onChange={(event) =>
-                  updateDraft("question", event.target.value)
+                  updateDraft(
+                    "question",
+                    event.target.value.slice(0, MAX_QUESTION_LENGTH),
+                  )
                 }
               />
             </label>

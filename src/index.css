@@ -34,6 +34,10 @@ body {
   margin: 0;
 }
 
+body::-webkit-scrollbar {
+  width: 0;
+}
+
 button,
 input,
 select,
@@ -107,23 +111,52 @@ h2 {
 .editable-chart-title {
   margin: 6px 0 0 !important;
   color: var(--ink);
-  font-size: 24px;
   font-weight: 700;
-  line-height: 1.14;
+  line-height: 1.25;
   letter-spacing: 0;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-word;
+}
+
+.editable-chart-title.title-short {
+  font-size: 24px;
+}
+
+.editable-chart-title.title-medium {
+  font-size: 20px;
+}
+
+.editable-chart-title.title-long {
+  font-size: 16px;
 }
 
 .editable-chart-title .ant-typography-edit {
   color: var(--muted);
 }
 
+.chart-title-row {
+  gap: 12px;
+}
+
+.chart-title-wrapper {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.chart-title-actions {
+  flex-shrink: 0;
+}
+
 .title-help-button {
-  display: inline-flex;
+  display: inline-block;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-  margin-top: 6px;
-  padding: 2px;
   border: none;
   border-radius: 50%;
   color: var(--muted);
@@ -205,7 +238,7 @@ h2 {
 
 .category-select {
   display: inline-grid;
-  grid-template-columns: auto minmax(118px, 150px);
+  grid-template-columns: auto minmax(80px, 80px);
   align-items: center;
   gap: 7px;
   min-height: 34px;
@@ -1030,8 +1063,16 @@ h2 {
     font-size: 30px;
   }
 
-  .editable-chart-title {
+  .editable-chart-title.title-short {
     font-size: 30px;
+  }
+
+  .editable-chart-title.title-medium {
+    font-size: 26px;
+  }
+
+  .editable-chart-title.title-long {
+    font-size: 20px;
   }
 
   .version-panel {

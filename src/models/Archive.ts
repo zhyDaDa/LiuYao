@@ -1,5 +1,5 @@
 import type { ChartSnapshot } from "./Gua";
-import { LiuYaoChart, Yao } from "./Gua";
+import { LiuYaoChart, Yao, MAX_QUESTION_LENGTH } from "./Gua";
 
 const ARCHIVE_KEY = "liuyao.archive.v1";
 
@@ -26,10 +26,22 @@ export const ARCHIVE_YAO_OPTIONS: {
 export function readArchive(): ChartSnapshot[] {
   try {
     const raw = localStorage.getItem(ARCHIVE_KEY);
-    return raw ? (JSON.parse(raw) as ChartSnapshot[]) : [];
+    const items = raw ? (JSON.parse(raw) as ChartSnapshot[]) : [];
+    return items.map(normalizeArchiveQuestion);
   } catch {
     return [];
   }
+}
+
+function normalizeArchiveQuestion(item: ChartSnapshot): ChartSnapshot {
+  if (item.question.length <= MAX_QUESTION_LENGTH) return item;
+
+  const question = item.question.slice(0, MAX_QUESTION_LENGTH);
+  return {
+    ...item,
+    question,
+    title: `${question} · ${new Date(item.calendar.createdAt).toLocaleDateString("zh-CN")}`,
+  };
 }
 
 export function writeArchive(items: ChartSnapshot[]) {

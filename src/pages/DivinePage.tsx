@@ -3,6 +3,7 @@ import { useState } from "react";
 import { ChartView } from "../components/ChartView";
 import { DrawingPanel } from "../components/DrawingPanel";
 import { TapButton } from "../components/TapButton";
+import { MAX_QUESTION_LENGTH } from "../models/Gua";
 import type { ChartSnapshot, YaoSnapshot } from "../models/Gua";
 import type { YaoPositionCategory } from "../models/YaoPositionImages";
 import { YAO_POSITION_CATEGORY_OPTIONS } from "../models/YaoPositionImages";
@@ -10,8 +11,16 @@ import { NotePad } from "../components/NotePad";
 import type { SimpleInfo } from "../App";
 import { Help } from "../icons/Icons";
 import { useAppTour } from "../tour/tourProvider";
+import { Space } from "antd-mobile";
 
 const { Paragraph } = Typography;
+
+function titleLengthClass(question: string): string {
+  const length = question.length;
+  if (length <= 5) return "title-short";
+  if (length <= 10) return "title-medium";
+  return "title-long";
+}
 
 export function DivinePage({
   snapshot,
@@ -44,7 +53,11 @@ export function DivinePage({
       <section className="page divine-page">
         <div className="page-title compact-title">
           <span className="eyebrow">排盘</span>
-          <Paragraph className="editable-chart-title">{"等待起卦"}</Paragraph>
+          <Paragraph
+            className={`editable-chart-title ${titleLengthClass("等待起卦")}`}
+          >
+            {"等待起卦"}
+          </Paragraph>
         </div>
 
         <div className="panel empty-cast-panel">
@@ -63,17 +76,8 @@ export function DivinePage({
   return (
     <section className="page divine-page">
       <div className="page-title compact-title">
-        <span className="eyebrow">排盘</span>
-        <Flex justify="space-between">
-          <Paragraph
-            className="editable-chart-title"
-            editable={{
-              tooltip: "修改排盘名称",
-              onChange: onRename,
-            }}
-          >
-            {snapshot.question}
-          </Paragraph>
+        <Flex justify="space-between" align="center">
+          <span className="eyebrow">排盘</span>
           <button
             type="button"
             className="title-help-button"
@@ -83,14 +87,30 @@ export function DivinePage({
             {Help}
           </button>
         </Flex>
+        <Flex justify="space-between" align="center" className="chart-title-row">
+          <div className="chart-title-wrapper">
+            <Paragraph
+              className={`editable-chart-title ${titleLengthClass(snapshot.question)}`}
+              editable={{
+                tooltip: "修改排盘名称",
+                onChange: onRename,
+                maxLength: MAX_QUESTION_LENGTH,
+              }}
+            >
+              {snapshot.question}
+            </Paragraph>
+          </div>
+          <Space className="chart-title-actions">
+            <TapButton color="primary" onTap={onCast}>
+              重新起卦
+            </TapButton>
+            <TapButton fill="outline" onTap={onSave}>
+              存档
+            </TapButton>
+          </Space>
+        </Flex>
       </div>
       <div className="action-strip" ref={registerTarget("divine-actions")}>
-        <TapButton color="primary" onTap={onCast}>
-          重新起卦
-        </TapButton>
-        <TapButton fill="outline" onTap={onSave}>
-          存档
-        </TapButton>
         <label className="category-select">
           <span>本卦范畴</span>
           <select
