@@ -63,7 +63,7 @@ export function HomePage({ onCast }: { onCast: () => void }) {
           作者: <Text strong>zhyDaDa</Text>
         </Paragraph>
         <Paragraph>
-          官网: <Link href="origin.zhydada.com">origin.zhyDaDa.com</Link>
+          官网: <Link href="https://origin.zhydada.com">origin.zhyDaDa.com</Link>
         </Paragraph>
       </div>
     </section>
