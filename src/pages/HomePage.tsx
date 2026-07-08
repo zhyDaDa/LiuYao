@@ -3,6 +3,7 @@ import { Typography } from "antd";
 import { useAppTour } from "../tour/tourProvider";
 import { Help } from "../icons/Icons";
 import { Image } from "antd-mobile";
+import WeChatGroup from "../assets/WeChatGroup.png";
 
 const { Paragraph, Title, Text, Link } = Typography;
 
@@ -69,7 +70,7 @@ export function HomePage({ onCast }: { onCast: () => void }) {
         </Paragraph>
         <Paragraph>
           zhyDaDa六爻排盘工具反馈群(若满员到官网加微信):
-          <Image src="src/assets/WeChatGroup.png" width={200} />
+          <Image src={WeChatGroup} width={200} />
         </Paragraph>
       </div>
     </section>
