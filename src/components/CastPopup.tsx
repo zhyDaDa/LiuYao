@@ -6,6 +6,7 @@ import { CastBasicInfo } from "./CastBasicInfo";
 import { CoinTossCanvas } from "./coin-toss/CoinTossCanvas";
 import { TapButton } from "./TapButton";
 import { useAppTour } from "../tour/tourProvider";
+import { trackEvent } from "../utils/analytics";
 import { Help } from "../icons/Icons";
 import styles from "./CastPopup.module.css";
 
@@ -78,6 +79,10 @@ export function CastPopup({
   }
 
   function handleAutoConfirm() {
+    trackEvent("auto_cast", {
+      question_present: Boolean(castInfo.question.trim()),
+      question_length: castInfo.question.trim().length,
+    });
     onAutoCast(getCastInfo());
   }
 
@@ -86,6 +91,11 @@ export function CastPopup({
       Toast.show({ content: "请先填写六次铜币结果" });
       return;
     }
+    trackEvent("start_pan", {
+      method: "manual",
+      question_present: Boolean(castInfo.question.trim()),
+      question_length: castInfo.question.trim().length,
+    });
     onManualCast({
       ...getCastInfo(),
       coinTotals: manualValues.map((value) => Number(value)),
@@ -99,6 +109,10 @@ export function CastPopup({
       return;
     }
 
+    trackEvent("manual_coin_fill", {
+      position: nextPosition,
+      value: total,
+    });
     updateManualValue(nextPosition, String(total));
   }
 
@@ -119,7 +133,10 @@ export function CastPopup({
           <button
             type="button"
             className={styles.helpButton}
-            onClick={() => startTour("toast-drawer")}
+            onClick={() => {
+              trackEvent("help", { context: "cast_popup" });
+              startTour("toast-drawer");
+            }}
             aria-label="查看起卦引导"
           >
             {Help}
@@ -173,12 +190,18 @@ export function CastPopup({
                   value={value ? [value] : []}
                   onConfirm={(selected) => {
                     const picked = selected[0];
-                    updateManualValue(
-                      position,
+                    const nextValue =
                       picked === null || picked === undefined
                         ? null
-                        : String(picked),
-                    );
+                        : String(picked);
+                    if (nextValue !== null) {
+                      trackEvent("manual_picker_select", {
+                        position,
+                        value: Number(nextValue),
+                        label: COIN_LABELS[nextValue],
+                      });
+                    }
+                    updateManualValue(position, nextValue);
                   }}
                 >
                   {(_, actions) => (

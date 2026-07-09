@@ -19,6 +19,7 @@ import { TablesPage } from "./pages/ReferencePage";
 import type { CastInfo, CastSubmitPayload } from "./types/cast";
 import type { PageKey } from "./types/navigation";
 import { AppTourProvider } from "./tour/tourProvider";
+import { usePageTracking } from "./hooks/usePageTracking";
 
 export type SimpleInfo = ReactNode | string | null;
 
@@ -37,6 +38,8 @@ function App() {
   const [useYaoPosition, setUseYaoPosition] = useState<number | null>(null);
   const [yaoPositionCategory, setYaoPositionCategory] =
     useState<YaoPositionCategory>(DEFAULT_YAO_POSITION_CATEGORY);
+
+  usePageTracking(activeKey);
 
   const snapshot = useMemo(
     () =>

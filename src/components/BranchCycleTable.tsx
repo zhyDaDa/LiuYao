@@ -3,6 +3,7 @@ import type { BranchName, ElementName, YinYang } from "../types/basicTerms";
 import { branch2Element } from "../utils/branch2Element";
 import { findBranchClash, findBranchHarmony } from "../utils/SKCH";
 import { SAN_HE_GROUPS } from "../models/rules/constants";
+import { trackEvent } from "../utils/analytics";
 
 interface BranchCell {
   name: BranchName;
@@ -102,7 +103,14 @@ export function BranchCycleTable() {
             key={branch.name}
             className={`branch-cell branch-${branch.element} ${active === branch.name ? "is-active" : ""}`}
             style={{ gridRow: branch.row, gridColumn: branch.col }}
-            onClick={() => setActive(branch.name)}
+            onClick={() => {
+              trackEvent("branch_click", {
+                branch: branch.name,
+                element: branch.element,
+                yinYang: branch.yinYang,
+              });
+              setActive(branch.name);
+            }}
             onPointerDown={() => startPress(branch.name)}
             onPointerUp={stopPress}
             onPointerLeave={stopPress}

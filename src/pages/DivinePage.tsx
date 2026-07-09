@@ -13,6 +13,7 @@ import type { AiConfig } from "../models/AiConfig";
 import type { SimpleInfo } from "../App";
 import { Help } from "../icons/Icons";
 import { useAppTour } from "../tour/tourProvider";
+import { trackEvent } from "../utils/analytics";
 import { Space } from "antd-mobile";
 
 const { Paragraph } = Typography;
@@ -71,7 +72,13 @@ export function DivinePage({
           <p>
             可以先随机起一卦，之后这里会显示万年历信息、本卦、变卦、六神、六亲、世应和每爻力量来源。
           </p>
-          <TapButton color="primary" onTap={onCast}>
+          <TapButton
+            color="primary"
+            onTap={() => {
+              trackEvent("start_cast", { location: "divine_empty" });
+              onCast();
+            }}
+          >
             开始起卦
           </TapButton>
         </div>

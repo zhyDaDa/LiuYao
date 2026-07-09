@@ -3,6 +3,7 @@ import { Typography } from "antd";
 import { useAppTour } from "../tour/tourProvider";
 import { Help } from "../icons/Icons";
 import { Image } from "antd-mobile";
+import { trackEvent } from "../utils/analytics";
 import WeChatGroup from "../assets/WeChatGroup.png";
 
 const { Paragraph, Title, Text, Link } = Typography;
@@ -23,7 +24,7 @@ export function HomePage({ onCast }: { onCast: () => void }) {
         <div>
           <Title level={2}>版本信息</Title>
           <Paragraph>
-            当前版本 0.5.2-beta，已包含:
+            当前版本 0.5.3-beta，已包含:
             <ul>
               <li>用户引导</li>
               <li>自动/手动/模拟起卦</li>
@@ -36,6 +37,7 @@ export function HomePage({ onCast }: { onCast: () => void }) {
               <li>速查表格</li>
               <li>规则集优化[增删全内容]</li>
               <li>简单AI分析参考</li>
+              <li>umami分析</li>
             </ul>
           </Paragraph>
         </div>
@@ -44,7 +46,13 @@ export function HomePage({ onCast }: { onCast: () => void }) {
             ref={registerTarget("start-cast")}
             style={{ display: "inline-block" }}
           >
-            <TapButton color="primary" onTap={onCast}>
+            <TapButton
+              color="primary"
+              onTap={() => {
+                trackEvent("start_cast", { location: "home" });
+                onCast();
+              }}
+            >
               起一卦
             </TapButton>
           </span>
@@ -65,8 +73,10 @@ export function HomePage({ onCast }: { onCast: () => void }) {
           作者: <Text strong>zhyDaDa</Text>
         </Paragraph>
         <Paragraph>
-          官网:{" "}
-          <Link href="https://origin.zhydada.com">origin.zhyDaDa.com</Link>
+          官网:
+          <Link href="https://origin.zhydada.com/?from=liuyao">
+            origin.zhyDaDa.com
+          </Link>
         </Paragraph>
         <Paragraph>
           zhyDaDa六爻排盘工具反馈群(若满员到官网加微信):
