@@ -1,4 +1,4 @@
-import type { PageKey } from "./navigation";
+import type { PageKey } from "../types/navigation";
 
 export const PAGE_CONFIG: Record<PageKey, { path: string; title: string }> = {
   home: { path: "/home", title: "首页" },
