@@ -63,8 +63,11 @@ export async function streamAnalysis(
         body: JSON.stringify({
           messages,
           temperature: 0.7,
-        })
-      })
+        }),
+      });
+    } catch (error) {
+      onError(error instanceof Error ? error : new Error(String(error)));
+      return;
     }
   }
 
