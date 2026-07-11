@@ -21,7 +21,7 @@ export async function testAiConfig(config: AiConfig): Promise<void> {
 }
 
 export async function streamAnalysis(
-  config: AiConfig,
+  config: AiConfig | null,
   messages: ChatMessage[],
   onContentChunk: (chunk: string) => void,
   onReasoningChunk: (chunk: string) => void,
@@ -29,7 +29,7 @@ export async function streamAnalysis(
   onError: (error: Error) => void,
 ): Promise<void> {
   let response: Response;
-  if (config.useCustomModel) {
+  if (config && config.useCustomModel) {
     const url = buildUrl(config.endpoint, "/chat/completions");
 
     try {

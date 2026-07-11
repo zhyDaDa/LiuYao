@@ -58,7 +58,7 @@ export function AiAnalysisSection({
   }
 
   const handleAnalyze = useCallback(() => {
-    if (!configured || !aiConfig) return;
+    // if (!configured || !aiConfig) return;
 
     setOutput("");
     setReasoning("");
