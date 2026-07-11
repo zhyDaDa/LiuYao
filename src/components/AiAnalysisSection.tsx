@@ -41,8 +41,19 @@ export function AiAnalysisSection({
     try {
       await navigator.clipboard.writeText(promptContext);
       Toast.show({ content: "已复制上下文" });
-    } catch {
+    } catch (e) {
       Toast.show({ content: "复制失败" });
+      console.error(e);
+    }
+  }
+
+  async function copyOutput() {
+    try {
+      await navigator.clipboard.writeText(output);
+      Toast.show({ content: "已复制断语" });
+    } catch (e) {
+      Toast.show({ content: "复制失败" });
+      console.error(e);
     }
   }
 
@@ -100,7 +111,7 @@ export function AiAnalysisSection({
     <>
       <div className={styles.wrapper}>
         <Flex justify="space-between" align="center" className={styles.header}>
-          <span className={styles.title}>AI分析 (仅支持Deepseek Api)</span>
+          <span className={styles.title}>AI分析</span>
         </Flex>
 
         {!hasResult && !analyzing && (
@@ -146,15 +157,11 @@ export function AiAnalysisSection({
 
             {!analyzing && (
               <Flex gap="small" className={styles.resultActions}>
-                <TapButton
-                  fill="outline"
-                  size="small"
-                  onTap={() => setConfigVisible(true)}
-                >
-                  配置AI
+                <TapButton fill="outline" size="small" onTap={copyOutput}>
+                  复制断语
                 </TapButton>
                 <TapButton color="primary" size="small" onTap={resetAnalysis}>
-                  重新分析
+                  清空断语
                 </TapButton>
               </Flex>
             )}

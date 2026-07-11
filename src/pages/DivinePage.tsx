@@ -100,7 +100,11 @@ export function DivinePage({
             {Help}
           </button>
         </Flex>
-        <Flex justify="space-between" align="center" className="chart-title-row">
+        <Flex
+          justify="space-between"
+          align="center"
+          className="chart-title-row"
+        >
           <div className="chart-title-wrapper">
             <Paragraph
               className={`editable-chart-title ${titleLengthClass(snapshot.question)}`}

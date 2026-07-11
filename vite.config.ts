@@ -13,5 +13,18 @@ export default defineConfig({
       hotKeys: ["altKey"],
     }),
     react(),
+    {
+      name: "disable-umami-in-development",
+
+      // 只在 vite dev / npm run dev 时启用
+      apply: "serve",
+
+      transformIndexHtml(html) {
+        return html.replace(
+          /<script\b[^>]*src=["'][^"']*umami\.zhydada\.com[^"']*["'][^>]*>\s*<\/script>/gi,
+          "",
+        );
+      },
+    },
   ],
 });

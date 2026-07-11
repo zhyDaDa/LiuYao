@@ -1,4 +1,4 @@
-import { Modal, Toast, Dialog } from "antd-mobile";
+import { Modal, Toast, Dialog, Switch } from "antd-mobile";
 import { useEffect, useState } from "react";
 import {
   DEFAULT_AI_ENDPOINT,
@@ -21,10 +21,12 @@ export function AiConfigModal({
   onSave: (config: AiConfig) => void;
 }) {
   const [draft, setDraft] = useState<AiConfig>({
+    useCustomModel: false,
     endpoint: DEFAULT_AI_ENDPOINT,
     model: DEFAULT_AI_MODEL,
     apiKey: "",
   });
+  const [isDraftChanged, setIsDraftChanged] = useState(false);
   const [testPassed, setTestPassed] = useState(false);
   const [testing, setTesting] = useState(false);
 
@@ -32,6 +34,7 @@ export function AiConfigModal({
     if (visible) {
       setDraft(
         config ?? {
+          useCustomModel: false,
           endpoint: DEFAULT_AI_ENDPOINT,
           model: DEFAULT_AI_MODEL,
           apiKey: "",
@@ -66,7 +69,10 @@ export function AiConfigModal({
   }
 
   function handleSave() {
-    if (!testPassed) return;
+    if (draft.useCustomModel && !testPassed) {
+      Toast.show({ content: "请先通过接口测试!" });
+      return;
+    }
     onSave(draft);
   }
 
@@ -86,32 +92,58 @@ export function AiConfigModal({
       content={
         <div className={styles.form}>
           <label className={styles.field}>
-            <span>端点</span>
-            <input
-              value={draft.endpoint}
-              placeholder="https://api.deepseek.com"
-              onChange={(event) => updateDraft("endpoint", event.target.value)}
-            />
+            <span>使用自定义模型</span>
+            <span>
+              <Switch
+                checked={draft.useCustomModel}
+                onChange={(checked) => {
+                  updateDraft("useCustomModel", checked);
+                  setIsDraftChanged(true);
+                }}
+              />
+            </span>
           </label>
 
-          <label className={styles.field}>
-            <span>模型名称</span>
-            <input
-              value={draft.model}
-              placeholder="deepseek-v4-flash"
-              onChange={(event) => updateDraft("model", event.target.value)}
-            />
-          </label>
+          {draft.useCustomModel && (
+            <>
+              <label className={styles.field}>
+                <span>端点(deepseek接口格式)</span>
+                <input
+                  value={draft.endpoint}
+                  placeholder="https://api.deepseek.com"
+                  onChange={(event) => {
+                    updateDraft("endpoint", event.target.value);
+                    setIsDraftChanged(true);
+                  }}
+                />
+              </label>
 
-          <label className={styles.field}>
-            <span>API 密钥</span>
-            <input
-              type="password"
-              value={draft.apiKey}
-              placeholder="sk-..."
-              onChange={(event) => updateDraft("apiKey", event.target.value)}
-            />
-          </label>
+              <label className={styles.field}>
+                <span>模型名称</span>
+                <input
+                  value={draft.model}
+                  placeholder="deepseek-v4-flash"
+                  onChange={(event) => {
+                    updateDraft("model", event.target.value);
+                    setIsDraftChanged(true);
+                  }}
+                />
+              </label>
+
+              <label className={styles.field}>
+                <span>API 密钥</span>
+                <input
+                  type="password"
+                  value={draft.apiKey}
+                  placeholder="sk-..."
+                  onChange={(event) => {
+                    updateDraft("apiKey", event.target.value);
+                    setIsDraftChanged(true);
+                  }}
+                />
+              </label>
+            </>
+          )}
 
           <div className={styles.actions}>
             <TapButton fill="outline" onTap={onClose}>
@@ -123,7 +155,7 @@ export function AiConfigModal({
             <TapButton
               color="primary"
               onTap={handleSave}
-              disabled={!testPassed}
+              disabled={!isDraftChanged}
             >
               保存配置
             </TapButton>

@@ -16,9 +16,7 @@ export async function testAiConfig(config: AiConfig): Promise<void> {
 
   if (!response.ok) {
     const text = await response.text().catch(() => "");
-    throw new Error(
-      `测试失败（${response.status}）${text ? `：${text}` : ""}`,
-    );
+    throw new Error(`测试失败（${response.status}）${text ? `：${text}` : ""}`);
   }
 }
 
@@ -30,34 +28,50 @@ export async function streamAnalysis(
   onDone: () => void,
   onError: (error: Error) => void,
 ): Promise<void> {
-  const url = buildUrl(config.endpoint, "/chat/completions");
-
   let response: Response;
-  try {
-    response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${config.apiKey}`,
-      },
-      body: JSON.stringify({
-        model: config.model,
-        messages,
-        stream: true,
-        temperature: 0.7,
-      }),
-    });
-  } catch (error) {
-    onError(error instanceof Error ? error : new Error(String(error)));
-    return;
+  if (config.useCustomModel) {
+    const url = buildUrl(config.endpoint, "/chat/completions");
+
+    try {
+      response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${config.apiKey}`,
+        },
+        body: JSON.stringify({
+          model: config.model,
+          messages,
+          stream: true,
+          temperature: 0.7,
+        }),
+      });
+    } catch (error) {
+      onError(error instanceof Error ? error : new Error(String(error)));
+      return;
+    }
+  } else {
+    const url = "https://chatApi.zhydada.com/stream";
+
+    try {
+      response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer huTY@n@e7^E!zx98jz`,
+        },
+        body: JSON.stringify({
+          messages,
+          temperature: 0.7,
+        })
+      })
+    }
   }
 
   if (!response.ok) {
     const text = await response.text().catch(() => "");
     onError(
-      new Error(
-        `请求失败（${response.status}）${text ? `：${text}` : ""}`,
-      ),
+      new Error(`请求失败（${response.status}）${text ? `：${text}` : ""}`),
     );
     return;
   }

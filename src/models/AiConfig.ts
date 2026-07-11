@@ -1,4 +1,5 @@
 export interface AiConfig {
+  useCustomModel: boolean;
   endpoint: string;
   model: string;
   apiKey: string;

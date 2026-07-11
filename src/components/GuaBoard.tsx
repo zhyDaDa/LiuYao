@@ -126,9 +126,9 @@ function GuaLineCell({
       : "";
 
   // 常用信息已在 YaoSnapshot 中计算好
-  const monthEffect = yao.monthEffect;
-  const dayEffect = yao.dayEffect;
-  const isVoid = yao.isVoid;
+  const monthEffect = changed ? yao.changedMonthEffect : yao.monthEffect;
+  const dayEffect = changed ? yao.changedDayEffect : yao.dayEffect;
+  const isVoid = changed ? yao.changedIsVoid : yao.isVoid;
 
   return (
     <span className={`gua-line-cell ${strengthClass} ${useSpiritClass}`}>

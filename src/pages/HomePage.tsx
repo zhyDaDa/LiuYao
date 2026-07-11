@@ -24,7 +24,7 @@ export function HomePage({ onCast }: { onCast: () => void }) {
         <div>
           <Title level={2}>版本信息</Title>
           <Paragraph>
-            当前版本 0.5.3-beta，已包含:
+            当前版本 0.6.1-beta，已包含:
             <ul>
               <li>用户引导</li>
               <li>自动/手动/模拟起卦</li>
@@ -36,7 +36,7 @@ export function HomePage({ onCast }: { onCast: () => void }) {
               <li>存档导入/导出</li>
               <li>速查表格</li>
               <li>规则集优化[增删全内容]</li>
-              <li>简单AI分析参考</li>
+              <li>接入免费AI分析参考</li>
               <li>umami分析</li>
             </ul>
           </Paragraph>

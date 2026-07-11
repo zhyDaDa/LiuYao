@@ -259,6 +259,9 @@ export interface YaoSnapshot {
   changedRelative: RelativeName;
   changedIsYang: boolean;
   changedRole: YaoRole;
+  changedMonthEffect: SKCHEffect;
+  changedDayEffect: SKCHEffect;
+  changedIsVoid: boolean;
   strength: number;
   strengthLabel: StrengthLabel;
   useSpiritRole: UseSpiritRole;
@@ -596,6 +599,9 @@ export class LiuYaoChart {
             : changedWorld.respondIndex === yao.position
               ? "应"
               : "",
+        changedMonthEffect: compareYaoForSKCH(monthBranch, changedBranch),
+        changedDayEffect: compareYaoForSKCH(dayBranch, changedBranch),
+        changedIsVoid: calendar.voidBranches.includes(changedBranch),
         strength,
         strengthLabel: strength >= 2 ? "旺" : strength <= -2 ? "衰" : "平",
         useSpiritRole: "",
