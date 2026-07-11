@@ -28,6 +28,7 @@ export function writeAiConfig(config: AiConfig): void {
 
 export function isAiConfigValid(config: AiConfig | null): boolean {
   if (!config) return false;
+  if (!config.useCustomModel) return true;
   return (
     config.endpoint.trim().length > 0 &&
     config.model.trim().length > 0 &&
